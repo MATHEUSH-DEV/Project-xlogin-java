@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,6 +22,7 @@ public class Xregister {
         JLabel label1 = new JLabel("Kronus REGISTRO v1.0");
         JLabel xxlogin = new JLabel("username: ");
         JLabel xxPass = new JLabel("Password: ");
+        JLabel xxconfirmanpass = new JLabel("Confirmar Password: ");
         JLabel xxemail = new JLabel("Email: ");
 
         // botão voltar
@@ -32,14 +34,22 @@ public class Xregister {
             frame.dispose();
         });
 
+        // nav bar 
         JTextField navbarlogin = new JTextField(); 
         JTextField navbaremail = new JTextField();
         JPasswordField passwordField = new JPasswordField(15);
+
+        // Gif
+        ImageIcon gifIcon = new ImageIcon("sombra.gif");
+        JLabel labelGif = new JLabel(gifIcon);
+
+
         
         // Placeholder (Common practice for UI/UX)
         configurarPlaceholder(navbarlogin, "Digite seu username");
         configurarPlaceholder(navbaremail, "Digite seu email");
         configurarPlaceholder(passwordField, "Digite sua senha");
+        
 
         // Adicionar ao frame
         frame.add(label1);
@@ -50,12 +60,16 @@ public class Xregister {
         frame.add(navbaremail);
         frame.add(passwordField);
         frame.add(buttonback);
+        frame.add(labelGif);
+        frame.add(xxconfirmanpass);
 
         // Estilização (Styling)
         label1.setFont(new Font("Arial", Font.BOLD, 27));
         xxlogin.setFont(new Font("Arial", Font.BOLD, 15));
         xxemail.setFont(new Font("Arial", Font.BOLD, 15));
         xxPass.setFont(new Font("Arial", Font.BOLD, 15));
+        xxconfirmanpass.setFont(new Font("Arial", Font.BOLD, 15));
+        
 
         // Posicionamento
         label1.setBounds(100, 20, 350, 40);
@@ -66,6 +80,8 @@ public class Xregister {
         navbaremail.setBounds(70, 109, 230, 25);
         passwordField.setBounds(100, 139, 200, 25);
         buttonback.setBounds(0, 0, 68, 20);
+        labelGif.setBounds(265, 16, 324, 427);
+        xxconfirmanpass.setBounds(20, 163, 170, 40);
 
         frame.setLocationRelativeTo(null); 
         frame.setVisible(true);
