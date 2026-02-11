@@ -30,6 +30,7 @@ public class Xregister {
 
         // tamanho / posicionamento
         label1.setBounds(100, 20, 350, 40);
+        xxlogin.setBounds(20, 84, 50, 40);
 
         frame.setLocationRelativeTo(null); 
         frame.setVisible(true);
