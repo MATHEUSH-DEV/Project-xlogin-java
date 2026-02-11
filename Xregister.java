@@ -2,9 +2,11 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JTextField; // Use JTextField em vez de TextArea para campos de uma linha
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 
 public class Xregister {
 
@@ -20,10 +22,11 @@ public class Xregister {
         JLabel xxlogin = new JLabel("username: ");
         JLabel xxPass = new JLabel("Password: ");
         JLabel xxemail = new JLabel("Email: ");
+        JButton buttonback = new JButton("Voltar");
 
         JTextField navbarlogin = new JTextField(); 
         JTextField navbaremail = new JTextField();
-        
+        JPasswordField passwordField = new JPasswordField(15);
         
         // Placeholder (Common practice for UI/UX)
         configurarPlaceholder(navbarlogin, "Digite seu username");
@@ -35,6 +38,8 @@ public class Xregister {
         frame.add(xxemail);
         frame.add(navbarlogin);
         frame.add(navbaremail);
+        frame.add(passwordField);
+        frame.add(buttonback);
 
         // Estilização (Styling)
         label1.setFont(new Font("Arial", Font.BOLD, 27));
@@ -48,7 +53,8 @@ public class Xregister {
         xxemail.setBounds(20, 101, 100, 40);
         xxPass.setBounds(20, 129, 100, 40);
         navbarlogin.setBounds(100, 75, 200, 25);
-        navbaremail.setBounds(70, 109, 225, 25);
+        navbaremail.setBounds(70, 109, 230, 25);
+        passwordField.setBounds(100, 139, 200, 25);
 
         frame.setLocationRelativeTo(null); 
         frame.setVisible(true);
