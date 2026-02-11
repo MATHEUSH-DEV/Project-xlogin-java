@@ -13,7 +13,7 @@ public class Xregister {
 
     public void abrirTela() {
         JFrame frame = new JFrame("Kronus Register v1.0");
-        frame.setSize(550, 300);
+        frame.setSize(750, 500);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setLayout(null);
         frame.setResizable(false);
@@ -28,28 +28,25 @@ public class Xregister {
         // botão voltar
         JButton buttonback = new JButton("Voltar");
         buttonback.addActionListener(e -> {
-
             Xlogin.main(null);
-
             frame.dispose();
         });
 
         // nav bar 
-        JTextField navbarlogin = new JTextField(); 
+        JTextField navbarlogin = new JTextField();
         JTextField navbaremail = new JTextField();
         JPasswordField passwordField = new JPasswordField(15);
+        JPasswordField navbarconfirmPasswordField = new JPasswordField(15);
 
         // Gif
         ImageIcon gifIcon = new ImageIcon("sombra.gif");
         JLabel labelGif = new JLabel(gifIcon);
 
-
-        
         // Placeholder (Common practice for UI/UX)
         configurarPlaceholder(navbarlogin, "Digite seu username");
         configurarPlaceholder(navbaremail, "Digite seu email");
         configurarPlaceholder(passwordField, "Digite sua senha");
-        
+        configurarPlaceholder(navbarconfirmPasswordField, "Confirme sua senha");
 
         // Adicionar ao frame
         frame.add(label1);
@@ -59,39 +56,58 @@ public class Xregister {
         frame.add(navbarlogin);
         frame.add(navbaremail);
         frame.add(passwordField);
+        frame.add(navbarconfirmPasswordField);
         frame.add(buttonback);
         frame.add(labelGif);
         frame.add(xxconfirmanpass);
 
         // Estilização (Styling)
-        label1.setFont(new Font("Arial", Font.BOLD, 27));
+        label1.setFont(new Font("Arial", Font.BOLD, 28));
         xxlogin.setFont(new Font("Arial", Font.BOLD, 15));
         xxemail.setFont(new Font("Arial", Font.BOLD, 15));
         xxPass.setFont(new Font("Arial", Font.BOLD, 15));
         xxconfirmanpass.setFont(new Font("Arial", Font.BOLD, 15));
-        
 
         // Posicionamento
-        label1.setBounds(100, 20, 350, 40);
-        xxlogin.setBounds(20, 70, 100, 40);
-        xxemail.setBounds(20, 101, 100, 40);
-        xxPass.setBounds(20, 129, 100, 40);
-        navbarlogin.setBounds(100, 75, 200, 25);
-        navbaremail.setBounds(70, 109, 230, 25);
-        passwordField.setBounds(100, 139, 200, 25);
-        buttonback.setBounds(0, 0, 68, 20);
-        labelGif.setBounds(265, 16, 324, 427);
-        xxconfirmanpass.setBounds(20, 163, 170, 40);
+        label1.setBounds(200, 20, 400, 50);
+        buttonback.setBounds(10, 10, 80, 25);
 
-        frame.setLocationRelativeTo(null); 
+        // --- Coluna de Formulário ---
+        int colunaLabel = 40;
+        int colunaInput = 180;
+
+        // Username
+        xxlogin.setBounds(colunaLabel, 100, 120, 30);
+        navbarlogin.setBounds(colunaInput, 100, 220, 30);
+
+        // Email
+        xxemail.setBounds(colunaLabel, 150, 120, 30);
+        navbaremail.setBounds(colunaInput, 150, 220, 30);
+
+        // Password
+        xxPass.setBounds(colunaLabel, 200, 120, 30);
+        passwordField.setBounds(colunaInput, 200, 220, 30);
+
+        // Confirmar Password
+        xxconfirmanpass.setBounds(colunaLabel, 250, 150, 30);
+        navbarconfirmPasswordField.setBounds(colunaInput, 250, 220, 30);
+
+        // Botão de finalizar registro
+        JButton btnFinalizar = new JButton("Finalizar Registro");
+        btnFinalizar.setBounds(colunaInput, 310, 220, 40);
+        frame.add(btnFinalizar);
+
+        // --- O GIF ---
+        labelGif.setBounds(410, 40, 324, 427);
+
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
-    // Alterado para JTextField para combinar com campos de entrada curtos
     public static void configurarPlaceholder(JTextField campo, String textoPadrao) {
         campo.setText(textoPadrao);
         campo.setForeground(Color.GRAY);
-        
+
         campo.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
