@@ -38,6 +38,8 @@ public class Xregister {
         
         // Placeholder (Common practice for UI/UX)
         configurarPlaceholder(navbarlogin, "Digite seu username");
+        configurarPlaceholder(navbaremail, "Digite seu email");
+        configurarPlaceholder(passwordField, "Digite sua senha");
 
         // Adicionar ao frame
         frame.add(label1);
