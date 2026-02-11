@@ -8,7 +8,7 @@ import javax.swing.JTextArea;
 
 public class Xlogin {
     public static void main(String[] args) {
-        JFrame frame = new JFrame("X Login");
+        JFrame frame = new JFrame("Kronus Login");
         frame.setSize(250, 300);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
@@ -16,7 +16,7 @@ public class Xlogin {
 
         // Elementos
         
-        JLabel inicio = new JLabel("X Login v1.0");
+        JLabel inicio = new JLabel("Kronus Login v1.0");
         JButton botao = new JButton("Entrar");
         JLabel login = new JLabel("Login: ");
         JLabel senha = new JLabel("Senha: ");
@@ -42,7 +42,7 @@ public class Xlogin {
 
 
         //tamanho JLabel
-        inicio.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 24));
+        inicio.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 16));
         login.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 15));
         senha.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 15));
 
