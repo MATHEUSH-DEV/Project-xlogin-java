@@ -20,7 +20,7 @@ public class Xregister {
 
         // Elementos
         JLabel label1 = new JLabel("Kronus REGISTRO v1.0");
-        JLabel xxlogin = new JLabel("username: ");
+        JLabel xxlogin = new JLabel("Username: ");
         JLabel xxPass = new JLabel("Password: ");
         JLabel xxconfirmanpass = new JLabel("Confirmar Password: ");
         JLabel xxemail = new JLabel("Email: ");
