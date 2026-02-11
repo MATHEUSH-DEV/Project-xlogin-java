@@ -22,7 +22,15 @@ public class Xregister {
         JLabel xxlogin = new JLabel("username: ");
         JLabel xxPass = new JLabel("Password: ");
         JLabel xxemail = new JLabel("Email: ");
+
+        // botão voltar
         JButton buttonback = new JButton("Voltar");
+        buttonback.addActionListener(e -> {
+
+            Xlogin.main(null);
+
+            frame.dispose();
+        });
 
         JTextField navbarlogin = new JTextField(); 
         JTextField navbaremail = new JTextField();
@@ -55,6 +63,7 @@ public class Xregister {
         navbarlogin.setBounds(100, 75, 200, 25);
         navbaremail.setBounds(70, 109, 230, 25);
         passwordField.setBounds(100, 139, 200, 25);
+        buttonback.setBounds(0, 0, 68, 20);
 
         frame.setLocationRelativeTo(null); 
         frame.setVisible(true);
