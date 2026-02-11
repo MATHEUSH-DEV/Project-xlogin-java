@@ -12,17 +12,23 @@ public class Xregister {
 
         // elementos
         JLabel label1 = new JLabel("Kronus REGISTRO v1.0");
-        
+        JLabel xxlogin = new JLabel("username: ");
+        JLabel xxPass = new JLabel("Password: ");
+        JLabel xxemail = new JLabel("Email: ");
+
 
         // Adicione seus componentes do registro aqui...
 
         // adicionar
         frame.add(label1);
+        frame.add(xxlogin);
+        frame.add(xxPass);
+        frame.add (xxemail);
 
         // tamanho JLabel
         label1.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 27));
 
-        // tamanho
+        // tamanho / posicionamento
         label1.setBounds(100, 20, 350, 40);
 
         frame.setLocationRelativeTo(null); 
