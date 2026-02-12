@@ -9,7 +9,7 @@ import javax.swing.JTextArea;
 public class Xlogin {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Kronus Login");
-        frame.setSize(250, 300);
+        frame.setSize(250, 301);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
         frame.setResizable(false);
