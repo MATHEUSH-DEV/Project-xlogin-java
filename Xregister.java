@@ -125,7 +125,7 @@ public class Xregister {
 
 
             // Caminho que configuramos no DBeaver
-            String url = "jdbc:sqlite:/home/matuza/Área de trabalho/Projetos/Project JAVA/Project-xlogin-java/kronus_local.db";
+            String url = "jdbc:sqlite:kronus_local.db";
             String sql = "INSERT INTO usuarios (username, password, email, status) VALUES (?, ?, ?, 'OFFLINE')";
 
             try (Connection conn = DriverManager.getConnection(url);
