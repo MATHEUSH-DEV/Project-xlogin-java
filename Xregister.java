@@ -66,14 +66,14 @@ public class Xregister {
         xxlogin.setFont(new Font("Arial", Font.BOLD, 15));
         xxemail.setFont(new Font("Arial", Font.BOLD, 15));
         xxPass.setFont(new Font("Arial", Font.BOLD, 15));
-        xxconfirmanpass.setFont(new Font("Arial", Font.BOLD, 15));
+        xxconfirmanpass.setFont(new Font("Arial", Font.BOLD, 13));
 
         // Posicionamento
         label1.setBounds(200, 20, 400, 50);
         buttonback.setBounds(10, 10, 80, 25);
 
         // --- Coluna de Formulário ---
-        int colunaLabel = 40;
+        int colunaLabel = 20;
         int colunaInput = 180;
 
         // Username
