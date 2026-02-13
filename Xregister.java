@@ -37,7 +37,7 @@ public class Xregister {
             frame.dispose();
         });
 
-        // nav bar 
+        // nav bar
         JTextField navbarlogin = new JTextField();
         JTextField navbaremail = new JTextField();
         JPasswordField passwordField = new JPasswordField(15);
@@ -65,9 +65,6 @@ public class Xregister {
         frame.add(buttonback);
         frame.add(labelGif);
         frame.add(xxconfirmanpass);
-
-
-
 
         // Estilização (Styling)
         label1.setFont(new Font("Arial", Font.BOLD, 28));
@@ -104,53 +101,55 @@ public class Xregister {
         JButton btnFinalizar = new JButton("Finalizar Registro");
 
         btnFinalizar.addActionListener(e -> {
-            String username = navbarlogin.getText();
-            String email = navbaremail.getText();
-            String password = new String(passwordField.getPassword());
-            String confirmPassword = new String(navbarconfirmPasswordField.getPassword());
+            String username = navbarlogin.getText().trim();
+            String email = navbaremail.getText().trim();
+            String password = new String(passwordField.getPassword()).trim();
+            String confirmPassword = new String(navbarconfirmPasswordField.getPassword()).trim();
 
-            // Validação de campos vazios ou placeholders
+            // 1. Validação de campos (Sempre primeiro)
             if (username.isEmpty() || username.equals("Digite seu username") ||
-                email.isEmpty() || email.equals("Digite seu email") ||
-                password.isEmpty() || password.equals("Digite sua senha") ||
-                confirmPassword.isEmpty() || confirmPassword.equals("Confirme sua senha")) {
-                JOptionPane.showMessageDialog(frame, "Por favor, preencha todos os campos corretamente.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    email.isEmpty() || email.equals("Digite seu email") ||
+                    password.isEmpty() || password.equals("Digite sua senha")) {
+                JOptionPane.showMessageDialog(frame, "Preencha todos os campos!", "Erro", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
+            // 2. Validação de Senha (Antes do Hash!)
             if (!password.equals(confirmPassword)) {
                 JOptionPane.showMessageDialog(frame, "As senhas não coincidem.", "Erro", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
+            // 3. Gerar o Hash 
+            String hashedPassword = PasswordHasher.hashPassword(password);
 
-            // Caminho que configuramos no DBeaver
-            String url = "jdbc:sqlite:kronus_local.db";
+            // 4. Banco de Dados
             String sql = "INSERT INTO usuarios (username, password, email, status) VALUES (?, ?, ?, 'OFFLINE')";
 
-            try (Connection conn = DriverManager.getConnection(url);
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            try (Connection conn = DriverManager.getConnection("jdbc:sqlite:kronus_local.db");
+                    PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
                 pstmt.setString(1, username);
-                pstmt.setString(2, password);
+                pstmt.setString(2, hashedPassword);
                 pstmt.setString(3, email);
 
+                // Executa UMA VEZ e já guarda o resultado
                 int rowsAffected = pstmt.executeUpdate();
+
                 if (rowsAffected > 0) {
-                    JOptionPane.showMessageDialog(frame, "Registro bem-sucedido! Você já pode fazer login.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Registro bem-sucedido!", "Sucesso",
+                            JOptionPane.INFORMATION_MESSAGE);
                     Xlogin.main(null);
                     frame.dispose();
-                } else {
-                    JOptionPane.showMessageDialog(frame, "Falha no registro. Tente novamente.", "Erro", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(frame, "Erro ao acessar o banco de dados: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                String msg = ex.getMessage().contains("UNIQUE") ? "Usuário ou Email já existe!" : ex.getMessage();
+                JOptionPane.showMessageDialog(frame, "Erro: " + msg, "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
+
         btnFinalizar.setBounds(colunaInput, 310, 220, 40);
         frame.add(btnFinalizar);
-
-
 
         // --- O GIF ---
         labelGif.setBounds(410, 40, 324, 427);
