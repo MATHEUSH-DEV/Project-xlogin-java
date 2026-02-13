@@ -1,3 +1,10 @@
+/**
+ * Utility class for secure password management.
+ * Uses BCrypt adaptive hashing to protect against brute-force attacks.
+ * Standard compliance for modern software engineering. 
+ * Author: MATHEUSH-DEV
+ */
+
 import org.mindrot.jbcrypt.BCrypt;
 
 public class PasswordHasher {
