@@ -1,7 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using ReactiveUI;
 
 namespace KronusLobby.ViewModels;
 
-public abstract class ViewModelBase : ObservableObject
+// É esta herança que resolve o erro CS0311!
+public class ViewModelBase : ReactiveObject
 {
 }
