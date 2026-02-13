@@ -12,7 +12,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 
-// ESSA LINHA ABAIXO É A QUE FALTAVA
 public class Xlogin {
 
     public void autenticar(String user, String pass) {
