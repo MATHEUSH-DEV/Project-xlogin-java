@@ -1,5 +1,5 @@
 kronus_local.db
-*.jar
+
 .vscode/
 bin/
 .DS_Store
@@ -49,6 +49,7 @@ out/
 *.user
 *.userosscache
 *.sln.docstates
+*.jar
 *.class
 target/
 *.war
