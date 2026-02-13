@@ -14,12 +14,28 @@ import javax.swing.JTextArea;
 
 public class Xlogin {
 
+    // 1. USER STATUS ENUMERATION FOR BETTER READABILITY AND MAINTENANCE 
+    public enum UserStatus {
+        OFFLINE(0), ONLINE(1), AWAY(2), BANNED(3);
+
+        private final int value;
+        UserStatus(int value) { this.value = value; }
+        public int getValue() { return value; }
+
+        public static UserStatus fromInt(int i) {
+            for (UserStatus s : UserStatus.values()) {
+                if (s.getValue() == i) return s;
+            }
+            return OFFLINE;
+        }
+    }
+
     public void autenticar(String user, String pass) {
         String url = "jdbc:sqlite:kronus_local.db";
+        // Buscamos o status também na query
         String sql = "SELECT * FROM usuarios WHERE username = ? AND password = ?";
 
         try {
-            // Isso avisa o Java para usar o driver que você colocou nas libraries
             Class.forName("org.sqlite.JDBC");
 
             try (Connection conn = DriverManager.getConnection(url);
@@ -31,13 +47,21 @@ public class Xlogin {
                 ResultSet rs = pstmt.executeQuery();
 
                 if (rs.next()) {
+                    // 2. VERIFICAÇÃO DE SEGURANÇA (CYBERSECURITY)
+                    int statusDoBanco = rs.getInt("status");
+
+                    if (statusDoBanco == UserStatus.BANNED.getValue()) {
+                        JOptionPane.showMessageDialog(null, "Your account is banned!", "Security Risk", JOptionPane.ERROR_MESSAGE);
+                        return; // Para o login aqui
+                    }
+
                     JOptionPane.showMessageDialog(null, "Login Success! Welcome to Kronus Rift.");
                 } else {
                     JOptionPane.showMessageDialog(null, "User or Password incorrect!");
                 }
             }
         } catch (ClassNotFoundException e) {
-            JOptionPane.showMessageDialog(null, "Erro: Driver SQLite ou SLF4J não carregados!");
+            JOptionPane.showMessageDialog(null, "Erro: Driver SQLite não encontrado!");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Database Error: " + e.getMessage());
         }
@@ -45,7 +69,7 @@ public class Xlogin {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Kronus Login");
-        frame.setSize(250, 320); 
+        frame.setSize(250, 320);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
         frame.setResizable(false);
@@ -54,9 +78,9 @@ public class Xlogin {
         JButton botao = new JButton("Entrar");
         JLabel login = new JLabel("Login: ");
         JLabel senha = new JLabel("Senha: ");
-        
+
         JTextArea navbar1 = new JTextArea("Digite seu username");
-        JPasswordField navbar2 = new JPasswordField(""); 
+        JPasswordField navbar2 = new JPasswordField("");
 
         Xlogin engine = new Xlogin();
 
@@ -71,11 +95,11 @@ public class Xlogin {
 
         botao2.addActionListener(e -> {
             logica.abrirTela();
-            frame.dispose(); 
+            frame.dispose();
         });
 
         configurarPlaceholder(navbar1, "Digite seu username");
-        
+
         inicio.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 16));
         login.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 15));
         senha.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 15));
@@ -85,7 +109,7 @@ public class Xlogin {
         navbar1.setBounds(70, 70, 140, 20);
         senha.setBounds(15, 110, 60, 20);
         navbar2.setBounds(70, 110, 140, 20);
-        
+
         botao.setBounds(60, 165, 120, 30);
         botao2.setBounds(60, 215, 120, 30);
 

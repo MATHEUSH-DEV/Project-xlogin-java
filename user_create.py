@@ -1,7 +1,7 @@
 import sqlite3
 
 def iniciar_banco():
-    # Conecta ao arquivo (se não existir, ele cria na hora)
+    # Conecta ao arquivo de banco de dados (ou cria se não existir)
     conn = sqlite3.connect('kronus_local.db')
     cursor = conn.cursor()
 
@@ -17,11 +17,11 @@ def iniciar_banco():
     conn.commit()
     return conn
 
-def registrar_usuario(username, password):
+def registrar_usuario(username, password, status='OFFLINE'):
     conn = iniciar_banco()
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO usuarios (username, password) VALUES (?, ?)", (username, password))
+        cursor.execute("INSERT INTO usuarios (username, password, status) VALUES (?, ?, ?)", (username, password, status))
         conn.commit()
         print(f"[SUCCESS] Usuário {username} registrado localmente!")
     except Exception as e:
