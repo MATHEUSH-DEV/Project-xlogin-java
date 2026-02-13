@@ -33,7 +33,7 @@ public class Xlogin {
     public void autenticar(String user, String pass) {
         String url = "jdbc:sqlite:kronus_local.db";
         // Buscamos o status também na query
-        String sql = "SELECT * FROM usuarios WHERE username = ? AND password = ?";
+        String sql = "SELECT * FROM usuarios WHERE username = ?";
 
         try {
             Class.forName("org.sqlite.JDBC");
