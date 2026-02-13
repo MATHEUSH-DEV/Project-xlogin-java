@@ -1,0 +1,4 @@
+kronus_local.db
+*.jar
+.vscode/
+bin/
