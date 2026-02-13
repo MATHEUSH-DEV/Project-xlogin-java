@@ -6,6 +6,7 @@ bin/
 .env
 .idea/
 out/
+*.deb
 *.iml
 logs/
 node_modules/
