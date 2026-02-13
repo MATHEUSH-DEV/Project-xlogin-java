@@ -18,6 +18,7 @@ coverage/
 *.sqlite3
 *.bak
 *.tmp
+*.json
 *.swp
 *.swo
 thumbs.db
@@ -56,6 +57,11 @@ target/
 *.war
 *.ear
 *.iml
+*.cs
+*.csproj
+*.axaml
+*.xaml
+*.sh
 *.ipr
 *.iws
 .DS_Store

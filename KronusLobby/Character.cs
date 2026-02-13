@@ -1,3 +1,4 @@
+using System;
 namespace KronusLobby;
 
 public class Character
