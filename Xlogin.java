@@ -14,17 +14,24 @@ import javax.swing.JTextArea;
 
 public class Xlogin {
 
-    // 1. USER STATUS ENUMERATION FOR BETTER READABILITY AND MAINTENANCE 
+    // 1. USER STATUS ENUMERATION FOR BETTER READABILITY AND MAINTENANCE
     public enum UserStatus {
         OFFLINE(0), ONLINE(1), AWAY(2), BANNED(3);
 
         private final int value;
-        UserStatus(int value) { this.value = value; }
-        public int getValue() { return value; }
+
+        UserStatus(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
 
         public static UserStatus fromInt(int i) {
             for (UserStatus s : UserStatus.values()) {
-                if (s.getValue() == i) return s;
+                if (s.getValue() == i)
+                    return s;
             }
             return OFFLINE;
         }
@@ -32,31 +39,43 @@ public class Xlogin {
 
     public void autenticar(String user, String pass) {
         String url = "jdbc:sqlite:kronus_local.db";
-        // Buscamos o status também na query
+        
         String sql = "SELECT * FROM usuarios WHERE username = ?";
 
         try {
             Class.forName("org.sqlite.JDBC");
 
             try (Connection conn = DriverManager.getConnection(url);
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
                 pstmt.setString(1, user.trim());
-                pstmt.setString(2, pass.trim());
-
                 ResultSet rs = pstmt.executeQuery();
 
                 if (rs.next()) {
-                    // 2. VERIFICAÇÃO DE SEGURANÇA (CYBERSECURITY)
-                    int statusDoBanco = rs.getInt("status");
+                    // MUDANÇA 2: Pegamos o hash que você gerou no registro
+                    String hashBanco = rs.getString("password");
 
-                    if (statusDoBanco == UserStatus.BANNED.getValue()) {
-                        JOptionPane.showMessageDialog(null, "Your account is banned!", "Security Risk", JOptionPane.ERROR_MESSAGE);
-                        return; // Para o login aqui
+                    // MUDANÇA 3: O Java valida se a senha bate com o hash
+                    if (PasswordHasher.checkPassword(pass.trim(), hashBanco)) {
+
+                        // Agora pegamos o status com segurança
+                        int statusDoBanco = rs.getInt("status");
+
+                        if (statusDoBanco == UserStatus.BANNED.getValue()) {
+                            JOptionPane.showMessageDialog(null, "Your account is banned!", "Security Risk",
+                                    JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
+                        JOptionPane.showMessageDialog(null, "Login Success! Welcome to Kronus Rift.");
+                        // Aqui você chamaria sua próxima tela
+
+                    } else {
+                        // Senha errada
+                        JOptionPane.showMessageDialog(null, "User or Password incorrect!");
                     }
-
-                    JOptionPane.showMessageDialog(null, "Login Success! Welcome to Kronus Rift.");
                 } else {
+                    // Usuário não existe
                     JOptionPane.showMessageDialog(null, "User or Password incorrect!");
                 }
             }
@@ -135,6 +154,7 @@ public class Xlogin {
                     campo.setForeground(Color.BLACK);
                 }
             }
+
             @Override
             public void focusLost(FocusEvent e) {
                 if (campo.getText().isEmpty()) {
