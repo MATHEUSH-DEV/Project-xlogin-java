@@ -20,12 +20,17 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
-            DisableAvaloniaDataAnnotationValidation();
+            // 1. Pegamos o ID dos argumentos (enviados pelo Java)
+            int userId = 1;
+            if (desktop.Args.Length > 0 && int.TryParse(desktop.Args[0], out int id))
+            {
+                userId = id;
+            }
+
+            // 2. Criamos a ViewModel já passando o ID correto
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = new MainWindowViewModel(userId),
             };
         }
 

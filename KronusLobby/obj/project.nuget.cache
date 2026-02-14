@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "OWT6ENl7NCE=",
+  "dgSpecHash": "kA3ps7M1DZM=",
   "success": true,
   "projectFilePath": "/home/matuza/Área de trabalho/Projetos/Project JAVA/Project-xlogin-java/KronusLobby/KronusLobby.csproj",
   "expectedPackageFiles": [
@@ -38,7 +38,9 @@
     "/root/.nuget/packages/system.componentmodel.annotations/5.0.0/system.componentmodel.annotations.5.0.0.nupkg.sha512",
     "/root/.nuget/packages/system.io.pipelines/8.0.0/system.io.pipelines.8.0.0.nupkg.sha512",
     "/root/.nuget/packages/system.reactive/6.0.1/system.reactive.6.0.1.nupkg.sha512",
-    "/root/.nuget/packages/tmds.dbus.protocol/0.21.2/tmds.dbus.protocol.0.21.2.nupkg.sha512"
+    "/root/.nuget/packages/tmds.dbus.protocol/0.21.2/tmds.dbus.protocol.0.21.2.nupkg.sha512",
+    "/root/.nuget/packages/microsoft.netcore.app.runtime.linux-x64/8.0.24/microsoft.netcore.app.runtime.linux-x64.8.0.24.nupkg.sha512",
+    "/root/.nuget/packages/microsoft.aspnetcore.app.runtime.linux-x64/8.0.24/microsoft.aspnetcore.app.runtime.linux-x64.8.0.24.nupkg.sha512"
   ],
   "logs": []
 }
