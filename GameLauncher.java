@@ -17,7 +17,7 @@ public class GameLauncher {
             String.valueOf(userId)
         );
 
-        // Define o diretório de trabalho para a raiz do projeto
+        // Define o diretório de trabalho para a raiz do projetos
         pb.directory(new File(System.getProperty("user.dir")));
         
         // Redireciona erros e saídas para o terminal atual (essencial no Linux)
