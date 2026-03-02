@@ -91,6 +91,8 @@ public class Xlogin extends javax.swing.JFrame {
     }
 }
 
+
+
     public static void main(String[] args) {
         JFrame frame = new JFrame("Kronus Login");
         frame.setSize(250, 320);
@@ -107,6 +109,7 @@ public class Xlogin extends javax.swing.JFrame {
         JPasswordField navbar2 = new JPasswordField("");
 
         Xlogin engine = new Xlogin();
+
 
         botao.addActionListener(e -> {
             String usuarioDigitado = navbar1.getText();

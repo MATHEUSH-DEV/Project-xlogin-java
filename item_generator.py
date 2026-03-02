@@ -9,6 +9,8 @@ def gerar_item_aleatorio():
     # Adicione novos elementos (isso dá personalidade ao item)
     elementos = ["de Fogo", "de Gelo", "do Trovão", "do Caos", "da Luz", "sombrio(a)", "Venoso(a)", "de Vento", "da Terra", "Ácido(a)", "de Água", "do Espírito", "de Sangue", "da Alma", "de Aço", "de Cristal", "de Sombra", "de Gelo", "de Fogo", "de Raio", "de Vento", "de Terra", "de Água", "do Caos", "da Luz", "sombrio(a)", "Venoso(a)", "do Espírito", "de Sangue", "da Alma", "de Aço", "de Cristal", "de Sombra"]
     
+
+    
     # Ajuste as raridades e as probabilidades (a soma deve ser 100)
     raridades = {
         "Comum": 60,     
