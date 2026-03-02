@@ -43,6 +43,7 @@ public class Xregister {
         JPasswordField passwordField = new JPasswordField(15);
         JPasswordField navbarconfirmPasswordField = new JPasswordField(15);
 
+
         // Gif
         ImageIcon gifIcon = new ImageIcon("sombra.gif");
         JLabel labelGif = new JLabel(gifIcon);

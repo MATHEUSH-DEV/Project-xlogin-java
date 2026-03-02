@@ -17,7 +17,9 @@ def gerar_item_aleatorio():
         "Raro": 25,
         "Épico": 10,      # Nova categoria!
         "Lendário": 5,
-        "Mítico": 3         # Ficou mais difícil de dropar
+        "Mítico": 3        # Ficou mais difícil de dropar
+        "Exótico": 2         # Categoria super rara, quase impossível de dropar
+        
     }
     
     nome = f"{random.choice(prefixos)} {random.choice(elementos)}"
@@ -32,8 +34,10 @@ def gerar_item_aleatorio():
         ataque = random.randint(121, 200)
     elif raridade == "Lendário":
         ataque = random.randint(201, 300)
-    else: # Mítico
+    elif raridade == "Mítico":
         ataque = random.randint(301, 500)
+    elif raridade == "Exótico":
+        ataque = random.randint(501, 1000)
 
     return (nome, raridade, ataque)
 
