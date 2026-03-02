@@ -17,9 +17,9 @@ def gerar_item_aleatorio():
         "Raro": 25,
         "Épico": 10,      # Nova categoria!
         "Lendário": 5,
-        "Mítico": 3        # Ficou mais difícil de dropar
-        "Exótico": 2         # Categoria super rara, quase impossível de dropar
-        
+        "Mítico": 3,        # Ficou mais difícil de dropar
+        "Exótico": 2        # Categoria super rara, quase impossível de dropar
+
     }
     
     nome = f"{random.choice(prefixos)} {random.choice(elementos)}"
