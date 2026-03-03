@@ -1,11 +1,13 @@
 package game;
 
 import model.Character;
+import util.CharacterManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 /**
  * Interface visual do jogo - Primeiro mundo.
@@ -14,6 +16,8 @@ import java.awt.event.WindowEvent;
 public class GameWindow extends JFrame {
     private final GameWorld gameWorld;
     private final Character character;
+    private final int userId;
+    private final JFrame lobbyWindow;
     private JLabel characterNameLabel;
     private JLabel levelLabel;
     private JLabel statsLabel;
@@ -23,11 +27,18 @@ public class GameWindow extends JFrame {
     private JPanel worldPanel;
     private JTextArea logArea;
 
-    public GameWindow(Character character) {
+    public GameWindow(Character character, int userId, JFrame lobbyWindow) {
         super("Kronus Rift - " + character.getName());
         this.character = character;
+        this.userId = userId;
+        this.lobbyWindow = lobbyWindow;
         this.gameWorld = new GameWorld(character);
         initUI();
+    }
+
+    // Construtor antigo para compatibilidade (será removido)
+    public GameWindow(Character character) {
+        this(character, 0, null);
     }
 
     private void initUI() {
@@ -333,7 +344,22 @@ public class GameWindow extends JFrame {
                 "Sair", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             logArea.append("\n📍 Saindo do jogo...\n");
+            
+            // Salva progresso do personagem
+            try {
+                CharacterManager.saveCharacters(userId, java.util.List.of(character));
+                logArea.append("💾 Progresso salvo com sucesso!\n");
+            } catch (IOException ex) {
+                logArea.append("⚠️ Erro ao salvar progresso: " + ex.getMessage() + "\n");
+            }
+            
+            // Fecha a janela do jogo
             dispose();
+            
+            // Reabre o lobby
+            if (lobbyWindow != null) {
+                lobbyWindow.setVisible(true);
+            }
         }
     }
 }

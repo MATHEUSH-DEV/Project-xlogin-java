@@ -262,7 +262,7 @@ public class CppLobbyWindow extends JFrame {
         infoPanel.setBackground(new Color(50, 50, 70));
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 
-        JLabel nameLabel = new JLabel("✦ " + ch.getName());
+        JLabel nameLabel = new JLabel("✦ " + ch.getName() + " [Lv. " + ch.getLevel() + "]");
         nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
         nameLabel.setForeground(new Color(255, 200, 100));
 
@@ -304,13 +304,14 @@ public class CppLobbyWindow extends JFrame {
     }
 
     private void enterGame(Character ch) {
-        JOptionPane.showMessageDialog(this, "Entrando no jogo com o personagem: " + ch.getName(), "Info", JOptionPane.INFORMATION_MESSAGE);
-        
         // Abre a janela do jogo - Mundo inicial
         SwingUtilities.invokeLater(() -> {
-            game.GameWindow gameWindow = new game.GameWindow(ch);
+            game.GameWindow gameWindow = new game.GameWindow(ch, userId, this);
             gameWindow.setVisible(true);
         });
+        
+        // Fecha o lobby
+        this.dispose();
     }
 
     private void deleteCharacter(Character ch) {

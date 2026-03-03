@@ -30,6 +30,13 @@ public class CharacterManager {
             json.append("    \"name\": \"").append(ch.getName()).append("\",\n");
             json.append("    \"race\": \"").append(ch.getRace()).append("\",\n");
             json.append("    \"clazz\": \"").append(ch.getClazz()).append("\",\n");
+            json.append("    \"level\": ").append(ch.getLevel()).append(",\n");
+            json.append("    \"strength\": ").append(ch.getStrength()).append(",\n");
+            json.append("    \"agility\": ").append(ch.getAgility()).append(",\n");
+            json.append("    \"intelligence\": ").append(ch.getIntelligence()).append(",\n");
+            json.append("    \"health\": ").append(ch.getHealth()).append(",\n");
+            json.append("    \"mana\": ").append(ch.getMana()).append(",\n");
+            json.append("    \"experience\": ").append(ch.getExperience()).append(",\n");
             json.append("    \"createdAt\": ").append(ch.getCreatedAt()).append("\n");
             json.append("  }");
             if (i < characters.size() - 1) json.append(",");
@@ -63,7 +70,36 @@ public class CharacterManager {
                     String clazz = extractJsonValue(block, "clazz");
                     
                     if (!name.isEmpty() && !race.isEmpty() && !clazz.isEmpty()) {
-                        characters.add(new Character(name, race, clazz));
+                        Character character = new Character(name, race, clazz);
+                        
+                        // Carregar stats adicionais se existirem
+                        String levelStr = extractJsonNumberValue(block, "level");
+                        String strStr = extractJsonNumberValue(block, "strength");
+                        String agiStr = extractJsonNumberValue(block, "agility");
+                        String intStr = extractJsonNumberValue(block, "intelligence");
+                        String healthStr = extractJsonNumberValue(block, "health");
+                        String manaStr = extractJsonNumberValue(block, "mana");
+                        String expStr = extractJsonNumberValue(block, "experience");
+                        
+                        // Se tiver dados de level, restaurar os stats
+                        if (!levelStr.isEmpty()) {
+                            try {
+                                int level = Integer.parseInt(levelStr);
+                                int str = Integer.parseInt(strStr);
+                                int agi = Integer.parseInt(agiStr);
+                                int intel = Integer.parseInt(intStr);
+                                int health = Integer.parseInt(healthStr);
+                                int mana = Integer.parseInt(manaStr);
+                                long exp = Long.parseLong(expStr);
+                                
+                                // Aplicar stats carregados
+                                character.restoreStats(level, str, agi, intel, health, mana, exp);
+                            } catch (NumberFormatException e) {
+                                // Se falhar, usar stats padrão
+                            }
+                        }
+                        
+                        characters.add(character);
                     }
                 }
             }
@@ -108,6 +144,20 @@ public class CharacterManager {
         if (startIdx == -1) return "";
         startIdx = json.indexOf("\"", startIdx + key.length() + 3) + 1;
         int endIdx = json.indexOf("\"", startIdx);
+        return endIdx > startIdx ? json.substring(startIdx, endIdx) : "";
+    }
+
+    private static String extractJsonNumberValue(String json, String key) {
+        int startIdx = json.indexOf("\"" + key + "\"");
+        if (startIdx == -1) return "";
+        startIdx = json.indexOf(":", startIdx) + 1;
+        while (startIdx < json.length() && java.lang.Character.isWhitespace(json.charAt(startIdx))) {
+            startIdx++;
+        }
+        int endIdx = startIdx;
+        while (endIdx < json.length() && (java.lang.Character.isDigit(json.charAt(endIdx)) || json.charAt(endIdx) == '.')) {
+            endIdx++;
+        }
         return endIdx > startIdx ? json.substring(startIdx, endIdx) : "";
     }
 }

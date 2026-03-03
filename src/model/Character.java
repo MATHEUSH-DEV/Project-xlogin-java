@@ -86,6 +86,20 @@ public class Character implements Serializable {
         }
     }
 
+    /**
+     * Restaura os stats do personagem do arquivo (JSON).
+     * Usado ao carregar personagens salvos.
+     */
+    public void restoreStats(int level, int strength, int agility, int intelligence, int health, int mana, long experience) {
+        this.level = level;
+        this.strength = strength;
+        this.agility = agility;
+        this.intelligence = intelligence;
+        this.health = health;
+        this.mana = mana;
+        this.experience = experience;
+    }
+
     @Override
     public String toString() {
         return String.format("Character{name='%s', race='%s', class='%s', level=%d, STR=%d, AGI=%d, INT=%d}", 
