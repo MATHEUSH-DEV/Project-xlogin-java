@@ -2,6 +2,7 @@ package ui;
 
 import model.Character;
 import util.CharacterManager;
+import game.GameWindow;
 
 import javax.swing.*;
 import java.awt.*;
@@ -304,7 +305,12 @@ public class CppLobbyWindow extends JFrame {
 
     private void enterGame(Character ch) {
         JOptionPane.showMessageDialog(this, "Entrando no jogo com o personagem: " + ch.getName(), "Info", JOptionPane.INFORMATION_MESSAGE);
-        // Aqui você pode adicionar lógica para entrar no jogo real
+        
+        // Abre a janela do jogo - Mundo inicial
+        SwingUtilities.invokeLater(() -> {
+            game.GameWindow gameWindow = new game.GameWindow(ch);
+            gameWindow.setVisible(true);
+        });
     }
 
     private void deleteCharacter(Character ch) {
