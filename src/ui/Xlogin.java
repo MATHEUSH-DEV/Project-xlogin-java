@@ -44,7 +44,8 @@ public class Xlogin extends javax.swing.JFrame {
                 if (user != null) {
                     JOptionPane.showMessageDialog(null, "Login Success! Welcome to Kronus Rift.");
                     engine.authService.launchLobby(user.getId());
-                    engine.dispose();
+                    // fecha a janela de login que foi exibida (frame), deixando apenas o lobby
+                    frame.dispose();
                 } else {
                     JOptionPane.showMessageDialog(null, "User or Password incorrect!");
                 }
