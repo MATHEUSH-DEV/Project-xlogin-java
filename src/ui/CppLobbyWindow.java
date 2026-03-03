@@ -44,14 +44,43 @@ public class CppLobbyWindow extends JFrame {
         getContentPane().add(header, BorderLayout.NORTH);
         getContentPane().add(scroll, BorderLayout.CENTER);
 
-        JPanel bottom = new JPanel(new BorderLayout(4, 4));
-        bottom.add(new JLabel("Digite comando:"), BorderLayout.WEST);
-        bottom.add(inputField, BorderLayout.CENTER);
+        // Controls: character creation panel + input field
+        JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new BorderLayout(6, 6));
 
-        getContentPane().add(bottom, BorderLayout.SOUTH);
+        JPanel charPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 6));
+        JComboBox<String> raceBox = new JComboBox<>(new String[]{"Humano", "Goblin", "Elfo"});
+        JComboBox<String> classBox = new JComboBox<>(new String[]{"Caçador", "Guerreiro", "Bruxo"});
+        JButton createButton = new JButton("Criar um personagem");
+        charPanel.add(new JLabel("Raça:"));
+        charPanel.add(raceBox);
+        charPanel.add(new JLabel("Classe:"));
+        charPanel.add(classBox);
+        charPanel.add(createButton);
+
+        JPanel inputPanel = new JPanel(new BorderLayout(4, 4));
+        inputPanel.add(new JLabel("Digite comando:"), BorderLayout.WEST);
+        inputPanel.add(inputField, BorderLayout.CENTER);
+
+        controlPanel.add(charPanel, BorderLayout.NORTH);
+        controlPanel.add(inputPanel, BorderLayout.SOUTH);
+
+        getContentPane().add(controlPanel, BorderLayout.SOUTH);
 
         // enviar ao pressionar Enter
         inputField.addActionListener(e -> sendInput());
+
+        // ação do botão de criar personagem
+        createButton.addActionListener(e -> {
+            String race = (String) raceBox.getSelectedItem();
+            String clazz = (String) classBox.getSelectedItem();
+            String cmd = "create_character " + race + " " + clazz;
+            appendLine("[GUI] Enviando comando: " + cmd);
+            if (processWriter != null) {
+                processWriter.println(cmd);
+                processWriter.flush();
+            }
+        });
 
         // garantir que o processo seja finalizado ao fechar a janela
         addWindowListener(new WindowAdapter() {

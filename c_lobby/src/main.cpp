@@ -2,6 +2,7 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <sstream>
 
 int main(int argc, char** argv) {
     std::string userId = (argc > 1) ? argv[1] : "unknown";
@@ -21,6 +22,18 @@ int main(int argc, char** argv) {
         // simulate a tiny lobby response
         if (line == "ping") {
             std::cout << "pong" << std::endl;
+            continue;
+        }
+        // create character command: create_character <Race> <Class>
+        if (line.rfind("create_character ", 0) == 0) {
+            std::istringstream iss(line);
+            std::string cmd, race, cls;
+            iss >> cmd >> race >> cls;
+            if (race.empty() || cls.empty()) {
+                std::cout << "Usage: create_character <Race> <Class>" << std::endl;
+            } else {
+                std::cout << "Character created: Race=" << race << ", Class=" << cls << " for user " << userId << std::endl;
+            }
             continue;
         }
         std::cout << "(lobby) unknown command: '" << line << "' - try 'ping' or 'exit'" << std::endl;
