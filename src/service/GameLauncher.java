@@ -35,8 +35,13 @@ public class GameLauncher {
 
         ProcessBuilder pb = new ProcessBuilder(execFile.getAbsolutePath(), String.valueOf(userId));
         pb.directory(new File(System.getProperty("user.dir")));
-        pb.inheritIO();
-        pb.start();
+        // Inicia o processo e conecta seus streams a uma janela Swing que exibirá a saída
+        Process process = pb.start();
         System.out.println("[Launcher] C++ Lobby iniciado para o User: " + userId + " usando: " + execFile.getAbsolutePath());
+        // Abre a janela do lobby em uma thread de evento Swing
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            ui.CppLobbyWindow window = new ui.CppLobbyWindow(process, userId, execFile.getAbsolutePath());
+            window.setVisible(true);
+        });
     }
 }
