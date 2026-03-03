@@ -11,17 +11,16 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 /**
- * Janela simples para mostrar a saída do processo C++ (lobby.exe)
- * e enviar entrada para ele.
+ * Janela de Lobby do Kronus Rift estilo WoW.
+ * Interface simples para criação de personagem (Raça + Classe).
  */
 public class CppLobbyWindow extends JFrame {
-    private final JTextArea outputArea = new JTextArea();
-    private final JTextField inputField = new JTextField();
+    private final JTextArea characterListArea = new JTextArea();
     private final Process process;
     private PrintWriter processWriter;
 
     public CppLobbyWindow(Process process, int userId, String execPath) {
-        super("Kronus C++ Lobby (beta) - User: " + userId);
+        super("Kronus Rift - Lobby");
         this.process = process;
         initUI(userId, execPath);
         hookProcessStreams();
@@ -29,58 +28,100 @@ public class CppLobbyWindow extends JFrame {
 
     private void initUI(int userId, String execPath) {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(700, 420);
+        setSize(800, 600);
         setLocationRelativeTo(null);
 
-        outputArea.setEditable(false);
-        outputArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        getContentPane().setLayout(new BorderLayout(12, 12));
+        getContentPane().setBackground(new Color(20, 20, 30));
 
-        JScrollPane scroll = new JScrollPane(outputArea);
-        getContentPane().setLayout(new BorderLayout(6, 6));
+        // --- HEADER ---
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(new Color(40, 40, 60));
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
-        JLabel header = new JLabel("[Launcher] C++ Lobby iniciado para o User: " + userId + " usando: " + execPath);
-        header.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+        JLabel titleLabel = new JLabel("Kronus Rift");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        titleLabel.setForeground(new Color(255, 200, 100));
 
-        getContentPane().add(header, BorderLayout.NORTH);
-        getContentPane().add(scroll, BorderLayout.CENTER);
+        JLabel subtitleLabel = new JLabel("Bem-vindo ao Lobby - Criação de Personagem");
+        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        subtitleLabel.setForeground(new Color(150, 150, 150));
 
-        // Controls: character creation panel + input field
+        headerPanel.add(titleLabel);
+        headerPanel.add(subtitleLabel);
+        getContentPane().add(headerPanel, BorderLayout.NORTH);
+
+        // --- CENTER: Character List ---
+        JPanel centerPanel = new JPanel(new BorderLayout(12, 12));
+        centerPanel.setBackground(new Color(20, 20, 30));
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+        JLabel charactersLabel = new JLabel("Seus Personagens:");
+        charactersLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        charactersLabel.setForeground(new Color(200, 200, 200));
+
+        characterListArea.setEditable(false);
+        characterListArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        characterListArea.setBackground(new Color(30, 30, 40));
+        characterListArea.setForeground(new Color(200, 200, 200));
+        characterListArea.setText("Nenhum personagem criado ainda.\nUse os controles abaixo para criar um novo personagem.");
+
+        JScrollPane scrollArea = new JScrollPane(characterListArea);
+        scrollArea.setBorder(BorderFactory.createLineBorder(new Color(100, 100, 120), 1));
+
+        centerPanel.add(charactersLabel, BorderLayout.NORTH);
+        centerPanel.add(scrollArea, BorderLayout.CENTER);
+
+        getContentPane().add(centerPanel, BorderLayout.CENTER);
+
+        // --- BOTTOM: Character Creation Controls ---
         JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new BorderLayout(6, 6));
+        controlPanel.setBackground(new Color(40, 40, 60));
+        controlPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 12));
+        controlPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
-        JPanel charPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 6));
+        // Race selection
+        JLabel raceLabel = new JLabel("Raça:");
+        raceLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        raceLabel.setForeground(new Color(200, 200, 200));
         JComboBox<String> raceBox = new JComboBox<>(new String[]{"Humano", "Goblin", "Elfo"});
+        raceBox.setFont(new Font("Arial", Font.PLAIN, 12));
+        raceBox.setPreferredSize(new Dimension(120, 32));
+
+        // Class selection
+        JLabel classLabel = new JLabel("Classe:");
+        classLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        classLabel.setForeground(new Color(200, 200, 200));
         JComboBox<String> classBox = new JComboBox<>(new String[]{"Caçador", "Guerreiro", "Bruxo"});
-        JButton createButton = new JButton("Criar um personagem");
-        charPanel.add(new JLabel("Raça:"));
-        charPanel.add(raceBox);
-        charPanel.add(new JLabel("Classe:"));
-        charPanel.add(classBox);
-        charPanel.add(createButton);
+        classBox.setFont(new Font("Arial", Font.PLAIN, 12));
+        classBox.setPreferredSize(new Dimension(120, 32));
 
-        JPanel inputPanel = new JPanel(new BorderLayout(4, 4));
-        inputPanel.add(new JLabel("Digite comando:"), BorderLayout.WEST);
-        inputPanel.add(inputField, BorderLayout.CENTER);
-
-        controlPanel.add(charPanel, BorderLayout.NORTH);
-        controlPanel.add(inputPanel, BorderLayout.SOUTH);
-
-        getContentPane().add(controlPanel, BorderLayout.SOUTH);
-
-        // enviar ao pressionar Enter
-        inputField.addActionListener(e -> sendInput());
-
-        // ação do botão de criar personagem
+        // Create button
+        JButton createButton = new JButton("Criar Personagem");
+        createButton.setFont(new Font("Arial", Font.BOLD, 14));
+        createButton.setPreferredSize(new Dimension(180, 40));
+        createButton.setBackground(new Color(200, 100, 50));
+        createButton.setForeground(Color.WHITE);
+        createButton.setFocusPainted(false);
         createButton.addActionListener(e -> {
             String race = (String) raceBox.getSelectedItem();
             String clazz = (String) classBox.getSelectedItem();
             String cmd = "create_character " + race + " " + clazz;
-            appendLine("[GUI] Enviando comando: " + cmd);
+            addCharacterToList(race, clazz);
             if (processWriter != null) {
                 processWriter.println(cmd);
                 processWriter.flush();
             }
         });
+
+        controlPanel.add(raceLabel);
+        controlPanel.add(raceBox);
+        controlPanel.add(classLabel);
+        controlPanel.add(classBox);
+        controlPanel.add(createButton);
+
+        getContentPane().add(controlPanel, BorderLayout.SOUTH);
 
         // garantir que o processo seja finalizado ao fechar a janela
         addWindowListener(new WindowAdapter() {
@@ -97,10 +138,13 @@ public class CppLobbyWindow extends JFrame {
         });
     }
 
-    private void appendLine(String line) {
+    private void addCharacterToList(String race, String clazz) {
         SwingUtilities.invokeLater(() -> {
-            outputArea.append(line + "\n");
-            outputArea.setCaretPosition(outputArea.getDocument().getLength());
+            String text = characterListArea.getText();
+            if (text.contains("Nenhum personagem criado ainda")) {
+                characterListArea.setText("");
+            }
+            characterListArea.append("✦ " + race + " - " + clazz + "\n");
         });
     }
 
@@ -108,29 +152,27 @@ public class CppLobbyWindow extends JFrame {
         // writer to process stdin
         processWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream()), true);
 
-        // stdout reader
+        // stdout reader (suppress standard output)
         Thread outThread = new Thread(() -> {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    appendLine(line);
+                while (br.readLine() != null) {
+                    // Ignore stdout from C++ process
                 }
             } catch (IOException ex) {
-                appendLine("[Error reading stdout] " + ex.getMessage());
+                // Ignore
             }
         }, "CppLobby-stdout-reader");
         outThread.setDaemon(true);
         outThread.start();
 
-        // stderr reader
+        // stderr reader (suppress standard error)
         Thread errThread = new Thread(() -> {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    appendLine(line);
+                while (br.readLine() != null) {
+                    // Ignore stderr from C++ process
                 }
             } catch (IOException ex) {
-                appendLine("[Error reading stderr] " + ex.getMessage());
+                // Ignore
             }
         }, "CppLobby-stderr-reader");
         errThread.setDaemon(true);
@@ -139,24 +181,12 @@ public class CppLobbyWindow extends JFrame {
         // watcher thread para detectar fim do processo
         Thread watch = new Thread(() -> {
             try {
-                int code = process.waitFor();
-                appendLine("[Process exited] code=" + code);
-                SwingUtilities.invokeLater(() -> inputField.setEditable(false));
+                process.waitFor();
             } catch (InterruptedException e) {
-                appendLine("[Watcher interrupted]");
+                // Ignore
             }
         }, "CppLobby-watcher");
         watch.setDaemon(true);
         watch.start();
-    }
-
-    private void sendInput() {
-        String text = inputField.getText();
-        if (text == null) return;
-        if (processWriter != null) {
-            processWriter.println(text);
-            processWriter.flush();
-        }
-        inputField.setText("");
     }
 }
