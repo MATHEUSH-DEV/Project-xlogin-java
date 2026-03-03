@@ -24,10 +24,19 @@ public class GameLauncher {
             lobbyPath = "./c_lobby/lobby";
         }
 
-        ProcessBuilder pb = new ProcessBuilder(lobbyPath, String.valueOf(userId));
+        // Verifica se o executável existe antes de tentar executar.
+        File execFile = new File(System.getProperty("user.dir"), lobbyPath);
+        if (!execFile.exists()) {
+            throw new IOException(
+                "Lobby executable not found: " + execFile.getAbsolutePath()
+                + "\nBuild it with CMake or compile src/main.cpp with g++. See README or run: g++ -std=c++17 c_lobby\\src\\main.cpp -o c_lobby\\lobby.exe"
+            );
+        }
+
+        ProcessBuilder pb = new ProcessBuilder(execFile.getAbsolutePath(), String.valueOf(userId));
         pb.directory(new File(System.getProperty("user.dir")));
         pb.inheritIO();
         pb.start();
-        System.out.println("[Launcher] C++ Lobby iniciado para o User: " + userId + " usando: " + lobbyPath);
+        System.out.println("[Launcher] C++ Lobby iniciado para o User: " + userId + " usando: " + execFile.getAbsolutePath());
     }
 }
