@@ -33,20 +33,33 @@ public class GameWorld {
 
     /**
      * Simula uma luta contra um inimigo comum.
+     * Versão com habilidade especial.
+     * 
+     * @param enemyName Nome do inimigo
+     * @param abilityIndex Índice da habilidade (-1 para ataque normal)
      */
-    public void fightEnemy(String enemyName) {
-        int baseDamage = 15;
-        int playerDamage = playerCharacter.getStrength() + (playerCharacter.getAgility() / 2);
+    public void fightEnemy(String enemyName, int abilityIndex) {
+        int baseDamage = playerCharacter.getStrength() + (playerCharacter.getAgility() / 2);
+        int finalDamage = baseDamage;
+        
+        // Usar habilidade especial se fornecido índice válido
+        if (abilityIndex >= 0) {
+            model.Ability ability = playerCharacter.useAbility(abilityIndex);
+            if (ability != null) {
+                finalDamage = ability.calculateDamage(baseDamage);
+            }
+        }
+        
         int enemyHealth = 50 + (playerCharacter.getLevel() * 10);
         
         // Combate simplificado
         while (enemyHealth > 0 && playerCharacter.getHealth() > 0) {
             // Jogador ataca
-            enemyHealth -= playerDamage;
+            enemyHealth -= finalDamage;
             if (enemyHealth <= 0) break;
             
             // Inimigo ataca
-            int enemyDamage = baseDamage - (playerCharacter.getAgility() / 5);
+            int enemyDamage = 15 - (playerCharacter.getAgility() / 5);
             playerCharacter.takeDamage(enemyDamage);
         }
         
@@ -56,6 +69,13 @@ public class GameWorld {
             playerCharacter.addExperience(expReward);
             playerCharacter.heal(30); // Regenera após vitória
         }
+    }
+    
+    /**
+     * Simula uma luta contra um inimigo comum (ataque normal, sem habilidade).
+     */
+    public void fightEnemy(String enemyName) {
+        fightEnemy(enemyName, -1);
     }
 
     public int getEnemiesDefeated() {

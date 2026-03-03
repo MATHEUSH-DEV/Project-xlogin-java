@@ -278,15 +278,131 @@ public class GameWindow extends JFrame {
     }
 
     private JPanel createActionPanel() {
-        JPanel panel = new JPanel();
-        panel.setBackground(new Color(40, 40, 60));
-        panel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel mainPanel = new JPanel();
+        mainPanel.setBackground(new Color(40, 40, 60));
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JLabel actionLabel = new JLabel("Duração da Sessão: ");
+        // ⭐ PAINEL DE HABILIDADES ESPECIAIS
+        JPanel abilitiesPanel = new JPanel();
+        abilitiesPanel.setBackground(new Color(40, 40, 60));
+        abilitiesPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 6, 6));
+        abilitiesPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(255, 150, 50), 1),
+            "⚡ Habilidades Especiais",
+            0, 0,
+            new Font("Arial", Font.BOLD, 11),
+            new Color(255, 150, 50)
+        ));
+
+        java.util.List<model.Ability> abilities = character.getAbilities();
+        for (int i = 0; i < abilities.size(); i++) {
+            model.Ability ability = abilities.get(i);
+            final int abilityIndex = i;
+
+            JButton abilityBtn = new JButton(ability.getName());
+            abilityBtn.setFont(new Font("Arial", Font.BOLD, 10));
+            abilityBtn.setBackground(new Color(100, 150, 200));
+            abilityBtn.setForeground(Color.WHITE);
+            abilityBtn.setFocusPainted(false);
+            abilityBtn.setPreferredSize(new Dimension(140, 35));
+            
+            String tooltip = String.format(
+                "<html>%s<br/>Mana: %d | Dano: %.0f%% | CD: %.1fs</html>",
+                ability.getDescription(),
+                ability.getManaCost(),
+                ability.getDamageMultiplier() * 100,
+                ability.getCooldownMs() / 1000.0
+            );
+            abilityBtn.setToolTipText(tooltip);
+
+            abilityBtn.addActionListener(e -> {
+                model.Ability used = character.useAbility(abilityIndex);
+                if (used != null) {
+                    String[] enemies = {"Goblin", "Lobo", "Espirito Florestal", "Bandido"};
+                    String enemy = enemies[(int) (Math.random() * enemies.length)];
+                    gameWorld.fightEnemy(enemy, abilityIndex);
+                    
+                    int damage = used.calculateDamage(character.getStrength() + (character.getAgility() / 2));
+                    logArea.append("\n✨ " + used.getName() + " usado contra o " + enemy + "!\n");
+                    logArea.append("   Dano: " + damage + " HP\n");
+
+                    if (character.getHealth() > 0) {
+                        logArea.append("   ✓ Vitória! Ganhou XP e cura.\n");
+                    } else {
+                        logArea.append("   ✗ Você foi derrotado!\n");
+                    }
+                    
+                    updateStatsDisplay();
+                } else {
+                    logArea.append("\n❌ Não pode usar " + ability.getName() + "!\n");
+                    logArea.append("   Mana insuficiente ou em cooldown.\n");
+                }
+                updateStatsDisplay();
+            });
+
+            abilitiesPanel.add(abilityBtn);
+        }
+
+        mainPanel.add(abilitiesPanel);
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        // PAINEL DE COMBATE NORMAL
+        JPanel combatPanel = new JPanel();
+        combatPanel.setBackground(new Color(40, 40, 60));
+        combatPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        combatPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(200, 100, 100), 1),
+            "⚔️ Combate",
+            0, 0,
+            new Font("Arial", Font.BOLD, 11),
+            new Color(200, 100, 100)
+        ));
+
+        JButton fightBtn = new JButton("Lutar contra Inimigo");
+        fightBtn.setFont(new Font("Arial", Font.BOLD, 12));
+        fightBtn.setBackground(new Color(200, 80, 80));
+        fightBtn.setForeground(Color.WHITE);
+        fightBtn.setFocusPainted(false);
+        fightBtn.setPreferredSize(new Dimension(140, 35));
+        fightBtn.addActionListener(e -> {
+            fight();
+            updateStatsDisplay();
+        });
+
+        JButton restBtn = new JButton("Descansar (Curar)");
+        restBtn.setFont(new Font("Arial", Font.BOLD, 12));
+        restBtn.setBackground(new Color(80, 180, 80));
+        restBtn.setForeground(Color.WHITE);
+        restBtn.setFocusPainted(false);
+        restBtn.setPreferredSize(new Dimension(140, 35));
+        restBtn.addActionListener(e -> {
+            character.heal(50);
+            logArea.append("\n💤 Você descansou e recuperou 50 HP.\n");
+            updateStatsDisplay();
+        });
+
+        JButton exitBtn = new JButton("Sair do Jogo");
+        exitBtn.setFont(new Font("Arial", Font.BOLD, 12));
+        exitBtn.setBackground(new Color(100, 100, 150));
+        exitBtn.setForeground(Color.WHITE);
+        exitBtn.setFocusPainted(false);
+        exitBtn.setPreferredSize(new Dimension(140, 35));
+        exitBtn.addActionListener(e -> saveAndExit());
+
+        combatPanel.add(fightBtn);
+        combatPanel.add(restBtn);
+        combatPanel.add(exitBtn);
+
+        mainPanel.add(combatPanel);
+
+        // Timer de sessão
+        mainPanel.add(Box.createVerticalStrut(10));
+        JLabel actionLabel = new JLabel("Duração da Sessão: 00:00:00");
         actionLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         actionLabel.setForeground(new Color(200, 200, 200));
-        panel.add(actionLabel);
+        actionLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(actionLabel);
 
         Timer timer = new Timer(1000, e -> {
             long duration = gameWorld.getSessionDuration();
@@ -297,7 +413,7 @@ public class GameWindow extends JFrame {
         });
         timer.start();
 
-        return panel;
+        return mainPanel;
     }
 
     private void fight() {
