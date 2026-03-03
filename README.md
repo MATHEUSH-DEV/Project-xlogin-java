@@ -9,7 +9,7 @@ Este repositório contém o cliente de login/registro para o jogo **Kronus Rift*
 - **Front-end**: Telas de login e cadastro desenvolvidas com Java Swing.
 - **Banco de dados**: SQLite (`kronus_local.db`) armazenando informações de usuários.
 - **Segurança**: Senhas hashadas com `BCrypt` (custo 12) através da classe `PasswordHasher`.
-- **Integração**: `GameLauncher` executa o projeto .NET/C# `KronusLobby` usando `ProcessBuilder`.
+- **Integração**: `GameLauncher` agora executa um pequeno lobby em C++ localizado em `c_lobby/` usando `ProcessBuilder`.
 - **Utilitários**: Scripts Python (`user_create.py`, `item_generator.py`) para manipulação externa do banco.
 
 ---

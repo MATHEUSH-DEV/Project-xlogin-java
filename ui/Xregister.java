@@ -46,7 +46,7 @@ public class Xregister {
         JPasswordField navbarconfirmPasswordField = new JPasswordField(15);
 
         // Gif
-        ImageIcon gifIcon = new ImageIcon("sombra.gif");
+        ImageIcon gifIcon = new ImageIcon("res\\sombra.gif");
         JLabel labelGif = new JLabel(gifIcon);
 
         // Placeholder (Common practice for UI/UX)
