@@ -1,5 +1,8 @@
 package ui;
 
+import model.Character;
+import util.CharacterManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -9,26 +12,34 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Janela de Lobby do Kronus Rift estilo WoW.
- * Interface simples para criação de personagem (Raça + Classe).
+ * Interface para criação, listagem e gerenciamento de personagens.
  */
 public class CppLobbyWindow extends JFrame {
-    private final JTextArea characterListArea = new JTextArea();
+    private final int userId;
     private final Process process;
     private PrintWriter processWriter;
+    private JPanel characterListPanel;
+    private JTextField nameField;
+    private JComboBox<String> raceBox;
+    private JComboBox<String> classBox;
+    private List<Character> characters;
 
     public CppLobbyWindow(Process process, int userId, String execPath) {
         super("Kronus Rift - Lobby");
         this.process = process;
+        this.userId = userId;
+        this.characters = CharacterManager.loadCharacters(userId);
         initUI(userId, execPath);
         hookProcessStreams();
     }
 
     private void initUI(int userId, String execPath) {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(800, 600);
+        setSize(900, 650);
         setLocationRelativeTo(null);
 
         getContentPane().setLayout(new BorderLayout(12, 12));
@@ -41,87 +52,52 @@ public class CppLobbyWindow extends JFrame {
         headerPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         JLabel titleLabel = new JLabel("Kronus Rift");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
         titleLabel.setForeground(new Color(255, 200, 100));
 
-        JLabel subtitleLabel = new JLabel("Bem-vindo ao Lobby - Criação de Personagem");
-        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        JLabel subtitleLabel = new JLabel("Bem-vindo ao Lobby - Criação e Gerenciamento de Personagens");
+        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 13));
         subtitleLabel.setForeground(new Color(150, 150, 150));
 
         headerPanel.add(titleLabel);
         headerPanel.add(subtitleLabel);
         getContentPane().add(headerPanel, BorderLayout.NORTH);
 
-        // --- CENTER: Character List ---
-        JPanel centerPanel = new JPanel(new BorderLayout(12, 12));
-        centerPanel.setBackground(new Color(20, 20, 30));
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        // --- CENTER: Split Panel (Creation + Character List) ---
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane.setBackground(new Color(20, 20, 30));
+        splitPane.setDividerLocation(350);
+
+        // --- LEFT: Creation Panel ---
+        JPanel creationPanel = createCreationPanel();
+        splitPane.setLeftComponent(creationPanel);
+
+        // --- RIGHT: Character List Panel ---
+        characterListPanel = new JPanel();
+        characterListPanel.setBackground(new Color(20, 20, 30));
+        characterListPanel.setLayout(new BoxLayout(characterListPanel, BoxLayout.Y_AXIS));
+        characterListPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         JLabel charactersLabel = new JLabel("Seus Personagens:");
         charactersLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        charactersLabel.setForeground(new Color(200, 200, 200));
+        charactersLabel.setForeground(new Color(255, 200, 100));
 
-        characterListArea.setEditable(false);
-        characterListArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        characterListArea.setBackground(new Color(30, 30, 40));
-        characterListArea.setForeground(new Color(200, 200, 200));
-        characterListArea.setText("Nenhum personagem criado ainda.\nUse os controles abaixo para criar um novo personagem.");
-
-        JScrollPane scrollArea = new JScrollPane(characterListArea);
+        JScrollPane scrollArea = new JScrollPane(characterListPanel);
+        scrollArea.setBackground(new Color(20, 20, 30));
+        scrollArea.getViewport().setBackground(new Color(20, 20, 30));
         scrollArea.setBorder(BorderFactory.createLineBorder(new Color(100, 100, 120), 1));
 
-        centerPanel.add(charactersLabel, BorderLayout.NORTH);
-        centerPanel.add(scrollArea, BorderLayout.CENTER);
+        JPanel rightPanel = new JPanel(new BorderLayout(6, 6));
+        rightPanel.setBackground(new Color(20, 20, 30));
+        rightPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        rightPanel.add(charactersLabel, BorderLayout.NORTH);
+        rightPanel.add(scrollArea, BorderLayout.CENTER);
 
-        getContentPane().add(centerPanel, BorderLayout.CENTER);
+        splitPane.setRightComponent(rightPanel);
+        getContentPane().add(splitPane, BorderLayout.CENTER);
 
-        // --- BOTTOM: Character Creation Controls ---
-        JPanel controlPanel = new JPanel();
-        controlPanel.setBackground(new Color(40, 40, 60));
-        controlPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 12));
-        controlPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-
-        // Race selection
-        JLabel raceLabel = new JLabel("Raça:");
-        raceLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        raceLabel.setForeground(new Color(200, 200, 200));
-        JComboBox<String> raceBox = new JComboBox<>(new String[]{"Humano", "Goblin", "Elfo"});
-        raceBox.setFont(new Font("Arial", Font.PLAIN, 12));
-        raceBox.setPreferredSize(new Dimension(120, 32));
-
-        // Class selection
-        JLabel classLabel = new JLabel("Classe:");
-        classLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        classLabel.setForeground(new Color(200, 200, 200));
-        JComboBox<String> classBox = new JComboBox<>(new String[]{"Caçador", "Guerreiro", "Bruxo"});
-        classBox.setFont(new Font("Arial", Font.PLAIN, 12));
-        classBox.setPreferredSize(new Dimension(120, 32));
-
-        // Create button
-        JButton createButton = new JButton("Criar Personagem");
-        createButton.setFont(new Font("Arial", Font.BOLD, 14));
-        createButton.setPreferredSize(new Dimension(180, 40));
-        createButton.setBackground(new Color(200, 100, 50));
-        createButton.setForeground(Color.WHITE);
-        createButton.setFocusPainted(false);
-        createButton.addActionListener(e -> {
-            String race = (String) raceBox.getSelectedItem();
-            String clazz = (String) classBox.getSelectedItem();
-            String cmd = "create_character " + race + " " + clazz;
-            addCharacterToList(race, clazz);
-            if (processWriter != null) {
-                processWriter.println(cmd);
-                processWriter.flush();
-            }
-        });
-
-        controlPanel.add(raceLabel);
-        controlPanel.add(raceBox);
-        controlPanel.add(classLabel);
-        controlPanel.add(classBox);
-        controlPanel.add(createButton);
-
-        getContentPane().add(controlPanel, BorderLayout.SOUTH);
+        // Carrega personagens na lista
+        refreshCharacterList();
 
         // garantir que o processo seja finalizado ao fechar a janela
         addWindowListener(new WindowAdapter() {
@@ -138,25 +114,242 @@ public class CppLobbyWindow extends JFrame {
         });
     }
 
-    private void addCharacterToList(String race, String clazz) {
-        SwingUtilities.invokeLater(() -> {
-            String text = characterListArea.getText();
-            if (text.contains("Nenhum personagem criado ainda")) {
-                characterListArea.setText("");
+    private JPanel createCreationPanel() {
+        JPanel panel = new JPanel();
+        panel.setBackground(new Color(40, 40, 60));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+
+        JLabel creationTitle = new JLabel("Criar Novo Personagem");
+        creationTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        creationTitle.setForeground(new Color(255, 200, 100));
+        creationTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        panel.add(creationTitle);
+        panel.add(Box.createVerticalStrut(16));
+
+        // Nome
+        JLabel nameLabel = new JLabel("Nome do Personagem:");
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        nameLabel.setForeground(new Color(200, 200, 200));
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(nameLabel);
+
+        nameField = new JTextField();
+        nameField.setFont(new Font("Arial", Font.PLAIN, 12));
+        nameField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+        nameField.setBackground(new Color(30, 30, 40));
+        nameField.setForeground(new Color(200, 200, 200));
+        nameField.setCaretColor(Color.WHITE);
+        panel.add(nameField);
+        panel.add(Box.createVerticalStrut(12));
+
+        // Raça
+        JLabel raceLabel = new JLabel("Raça:");
+        raceLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        raceLabel.setForeground(new Color(200, 200, 200));
+        raceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(raceLabel);
+
+        raceBox = new JComboBox<>(new String[]{"Humano 👤", "Goblin 👹", "Elfo 🧝"});
+        raceBox.setFont(new Font("Arial", Font.PLAIN, 12));
+        raceBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+        raceBox.setBackground(new Color(30, 30, 40));
+        raceBox.setForeground(new Color(200, 200, 200));
+        panel.add(raceBox);
+        panel.add(Box.createVerticalStrut(12));
+
+        // Classe
+        JLabel classLabel = new JLabel("Classe:");
+        classLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        classLabel.setForeground(new Color(200, 200, 200));
+        classLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(classLabel);
+
+        classBox = new JComboBox<>(new String[]{"Caçador 🏹", "Guerreiro ⚔️", "Bruxo 🔮"});
+        classBox.setFont(new Font("Arial", Font.PLAIN, 12));
+        classBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+        classBox.setBackground(new Color(30, 30, 40));
+        classBox.setForeground(new Color(200, 200, 200));
+        panel.add(classBox);
+        panel.add(Box.createVerticalStrut(20));
+
+        // Create button
+        JButton createButton = new JButton("Criar Personagem");
+        createButton.setFont(new Font("Arial", Font.BOLD, 14));
+        createButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        createButton.setBackground(new Color(200, 100, 50));
+        createButton.setForeground(Color.WHITE);
+        createButton.setFocusPainted(false);
+        createButton.addActionListener(e -> createCharacter());
+        panel.add(createButton);
+
+        panel.add(Box.createVerticalGlue());
+
+        return panel;
+    }
+
+    private void createCharacter() {
+        String name = nameField.getText().trim();
+        if (name.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Digite um nome para o personagem!", "Erro", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (CharacterManager.characterNameExists(userId, name)) {
+            JOptionPane.showMessageDialog(this, "Este nome de personagem já existe!", "Erro", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Extrai raça e classe (remove emojis)
+        String raceStr = ((String) raceBox.getSelectedItem()).split(" ")[0];
+        String classStr = ((String) classBox.getSelectedItem()).split(" ")[0];
+
+        try {
+            Character character = new Character(name, raceStr, classStr);
+            CharacterManager.addCharacter(userId, character);
+            characters = CharacterManager.loadCharacters(userId);
+
+            // Envia comando ao C++
+            String cmd = "create_character " + raceStr + " " + classStr;
+            if (processWriter != null) {
+                processWriter.println(cmd);
+                processWriter.flush();
             }
-            characterListArea.append("✦ " + race + " - " + clazz + "\n");
-        });
+
+            nameField.setText("");
+            refreshCharacterList();
+            JOptionPane.showMessageDialog(this, "Personagem criado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao salvar personagem: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void refreshCharacterList() {
+        characterListPanel.removeAll();
+
+        if (characters.isEmpty()) {
+            JLabel emptyLabel = new JLabel("Nenhum personagem criado.");
+            emptyLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+            emptyLabel.setForeground(new Color(150, 150, 150));
+            characterListPanel.add(emptyLabel);
+        } else {
+            for (Character ch : characters) {
+                JPanel charPanel = createCharacterPanel(ch);
+                characterListPanel.add(charPanel);
+                characterListPanel.add(Box.createVerticalStrut(8));
+            }
+        }
+
+        characterListPanel.add(Box.createVerticalGlue());
+        characterListPanel.revalidate();
+        characterListPanel.repaint();
+    }
+
+    private JPanel createCharacterPanel(Character ch) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout(10, 10));
+        panel.setBackground(new Color(50, 50, 70));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(100, 100, 120), 1),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+
+        // Info
+        JPanel infoPanel = new JPanel();
+        infoPanel.setBackground(new Color(50, 50, 70));
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+
+        JLabel nameLabel = new JLabel("✦ " + ch.getName());
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        nameLabel.setForeground(new Color(255, 200, 100));
+
+        JLabel detailsLabel = new JLabel(getRaceIcon(ch.getRace()) + " " + ch.getRace() + "  |  " + getClassIcon(ch.getClazz()) + " " + ch.getClazz());
+        detailsLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        detailsLabel.setForeground(new Color(180, 180, 200));
+
+        infoPanel.add(nameLabel);
+        infoPanel.add(Box.createVerticalStrut(4));
+        infoPanel.add(detailsLabel);
+
+        panel.add(infoPanel, BorderLayout.CENTER);
+
+        // Buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(new Color(50, 50, 70));
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+
+        JButton playButton = new JButton("Entrar");
+        playButton.setFont(new Font("Arial", Font.BOLD, 11));
+        playButton.setBackground(new Color(100, 200, 100));
+        playButton.setForeground(Color.WHITE);
+        playButton.setFocusPainted(false);
+        playButton.addActionListener(e -> enterGame(ch));
+
+        JButton deleteButton = new JButton("Deletar");
+        deleteButton.setFont(new Font("Arial", Font.BOLD, 11));
+        deleteButton.setBackground(new Color(200, 50, 50));
+        deleteButton.setForeground(Color.WHITE);
+        deleteButton.setFocusPainted(false);
+        deleteButton.addActionListener(e -> deleteCharacter(ch));
+
+        buttonPanel.add(playButton);
+        buttonPanel.add(deleteButton);
+
+        panel.add(buttonPanel, BorderLayout.EAST);
+
+        return panel;
+    }
+
+    private void enterGame(Character ch) {
+        JOptionPane.showMessageDialog(this, "Entrando no jogo com o personagem: " + ch.getName(), "Info", JOptionPane.INFORMATION_MESSAGE);
+        // Aqui você pode adicionar lógica para entrar no jogo real
+    }
+
+    private void deleteCharacter(Character ch) {
+        int confirm = JOptionPane.showConfirmDialog(this, 
+                "Tem certeza que deseja deletar o personagem " + ch.getName() + "?", 
+                "Confirmar", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                CharacterManager.deleteCharacter(userId, ch.getName());
+                characters = CharacterManager.loadCharacters(userId);
+                refreshCharacterList();
+                JOptionPane.showMessageDialog(this, "Personagem deletado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao deletar personagem: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private String getRaceIcon(String race) {
+        return switch (race) {
+            case "Humano" -> "👤";
+            case "Goblin" -> "👹";
+            case "Elfo" -> "🧝";
+            default -> "•";
+        };
+    }
+
+    private String getClassIcon(String clazz) {
+        return switch (clazz) {
+            case "Caçador" -> "🏹";
+            case "Guerreiro" -> "⚔️";
+            case "Bruxo" -> "🔮";
+            default -> "•";
+        };
     }
 
     private void hookProcessStreams() {
         // writer to process stdin
         processWriter = new PrintWriter(new OutputStreamWriter(process.getOutputStream()), true);
 
-        // stdout reader (suppress standard output)
+        // Suppress stdout/stderr
         Thread outThread = new Thread(() -> {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 while (br.readLine() != null) {
-                    // Ignore stdout from C++ process
+                    // Ignore
                 }
             } catch (IOException ex) {
                 // Ignore
@@ -165,11 +358,10 @@ public class CppLobbyWindow extends JFrame {
         outThread.setDaemon(true);
         outThread.start();
 
-        // stderr reader (suppress standard error)
         Thread errThread = new Thread(() -> {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
                 while (br.readLine() != null) {
-                    // Ignore stderr from C++ process
+                    // Ignore
                 }
             } catch (IOException ex) {
                 // Ignore
@@ -178,7 +370,6 @@ public class CppLobbyWindow extends JFrame {
         errThread.setDaemon(true);
         errThread.start();
 
-        // watcher thread para detectar fim do processo
         Thread watch = new Thread(() -> {
             try {
                 process.waitFor();
