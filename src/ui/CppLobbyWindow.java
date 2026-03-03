@@ -112,6 +112,20 @@ public class CppLobbyWindow extends JFrame {
                 } catch (InterruptedException ignored) {
                 }
             }
+            
+            @Override
+            public void windowDeiconified(WindowEvent e) {
+                // Quando a janela volta a ficar visível, recarrega os personagens
+                characters = CharacterManager.loadCharacters(userId);
+                refreshCharacterList();
+            }
+            
+            @Override
+            public void windowActivated(WindowEvent e) {
+                // Quando a janela ganha foco (pode ter voltado de outro programa), recarrega
+                characters = CharacterManager.loadCharacters(userId);
+                refreshCharacterList();
+            }
         });
     }
 
