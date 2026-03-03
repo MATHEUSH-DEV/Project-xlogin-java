@@ -1,3 +1,5 @@
+package old;
+
 import java.awt.Color;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -39,59 +41,58 @@ public class Xlogin extends javax.swing.JFrame {
     }
 
     public void autenticar(String user, String pass) {
-    String url = "jdbc:sqlite:kronus_local.db";
-    String sql = "SELECT * FROM usuarios WHERE username = ?";
+        String url = "jdbc:sqlite:kronus_local.db";
+        String sql = "SELECT * FROM usuarios WHERE username = ?";
 
-    try {
-        Class.forName("org.sqlite.JDBC");
+        try {
+            Class.forName("org.sqlite.JDBC");
 
-        try (Connection conn = DriverManager.getConnection(url);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            try (Connection conn = DriverManager.getConnection(url);
+                    PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, user.trim());
-            ResultSet rs = pstmt.executeQuery();
+                pstmt.setString(1, user.trim());
+                ResultSet rs = pstmt.executeQuery();
 
-            if (rs.next()) {
-                String hashBanco = rs.getString("password");
+                if (rs.next()) {
+                    String hashBanco = rs.getString("password");
 
-                // Valida se a senha bate com o hash [cite: 2026-02-13]
-                if (PasswordHasher.checkPassword(pass.trim(), hashBanco)) {
-                    
-                    // 1. Verificação de Segurança (BAN) [cite: 2026-02-10]
-                    int statusDoBanco = rs.getInt("status");
-                    if (statusDoBanco == UserStatus.BANNED.getValue()) {
-                        JOptionPane.showMessageDialog(null, "Your account is banned!", "Security Risk", JOptionPane.ERROR_MESSAGE);
-                        return;
+                    // Valida se a senha bate com o hash [cite: 2026-02-13]
+                    if (PasswordHasher.checkPassword(pass.trim(), hashBanco)) {
+
+                        // 1. Verificação de Segurança (BAN) [cite: 2026-02-10]
+                        int statusDoBanco = rs.getInt("status");
+                        if (statusDoBanco == UserStatus.BANNED.getValue()) {
+                            JOptionPane.showMessageDialog(null, "Your account is banned!", "Security Risk",
+                                    JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
+                        // 2. Login Sucesso
+                        JOptionPane.showMessageDialog(null, "Login Success! Welcome to Kronus Rift.");
+
+                        // 3. Launch do Lobby C# [cite: 2026-02-05, 2026-02-13]
+                        int idDoUsuario = rs.getInt("id");
+                        try {
+                            GameLauncher.launchLobby(idDoUsuario);
+                            this.dispose();
+                        } catch (IOException e) {
+                            JOptionPane.showMessageDialog(null, "Erro ao abrir o Lobby: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+
+                    } else {
+                        JOptionPane.showMessageDialog(null, "User or Password incorrect!");
                     }
-
-                    // 2. Login Sucesso
-                    JOptionPane.showMessageDialog(null, "Login Success! Welcome to Kronus Rift.");
-                    
-                    // 3. Launch do Lobby C# [cite: 2026-02-05, 2026-02-13]
-                    int idDoUsuario = rs.getInt("id"); 
-                    try {
-                        GameLauncher.launchLobby(idDoUsuario);
-                        this.dispose(); 
-                    } catch (IOException e) {
-                        JOptionPane.showMessageDialog(null, "Erro ao abrir o Lobby: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-
                 } else {
                     JOptionPane.showMessageDialog(null, "User or Password incorrect!");
                 }
-            } else {
-                JOptionPane.showMessageDialog(null, "User or Password incorrect!");
             }
+        } catch (ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(null, "Erro: Driver SQLite não encontrado!");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Database Error: " + e.getMessage());
         }
-    } catch (ClassNotFoundException e) {
-        JOptionPane.showMessageDialog(null, "Erro: Driver SQLite não encontrado!");
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(null, "Database Error: " + e.getMessage());
     }
-}
-
-
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Kronus Login");
@@ -109,7 +110,6 @@ public class Xlogin extends javax.swing.JFrame {
         JPasswordField navbar2 = new JPasswordField("");
 
         Xlogin engine = new Xlogin();
-
 
         botao.addActionListener(e -> {
             String usuarioDigitado = navbar1.getText();

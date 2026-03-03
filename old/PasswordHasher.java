@@ -1,3 +1,5 @@
+package old;
+
 /**
  * Utility class for secure password management.
  * Uses BCrypt adaptive hashing to protect against brute-force attacks.

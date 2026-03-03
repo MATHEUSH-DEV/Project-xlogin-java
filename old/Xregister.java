@@ -1,3 +1,5 @@
+package old;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
@@ -42,7 +44,6 @@ public class Xregister {
         JTextField navbaremail = new JTextField();
         JPasswordField passwordField = new JPasswordField(15);
         JPasswordField navbarconfirmPasswordField = new JPasswordField(15);
-
 
         // Gif
         ImageIcon gifIcon = new ImageIcon("sombra.gif");
@@ -121,7 +122,7 @@ public class Xregister {
                 return;
             }
 
-            // 3. Gerar o Hash 
+            // 3. Gerar o Hash
             String hashedPassword = PasswordHasher.hashPassword(password);
 
             // 4. Banco de Dados
