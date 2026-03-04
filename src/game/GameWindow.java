@@ -1,13 +1,16 @@
 package game;
 
-import model.Character;
-import util.CharacterManager;
-
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import model.Character;
+import util.CharacterManager;
 
 /**
  * Interface visual do jogo - Primeiro mundo.
@@ -26,6 +29,7 @@ public class GameWindow extends JFrame {
     private JLabel enemiesLabel;
     private JPanel worldPanel;
     private JTextArea logArea;
+    private BufferedImage mapImage;
 
     public GameWindow(Character character, int userId, JFrame lobbyWindow) {
         super("Kronus Rift - " + character.getName());
@@ -103,43 +107,98 @@ public class GameWindow extends JFrame {
         panel.setLayout(new BorderLayout(12, 12));
         panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
+        // --- Carrega a imagem do mapa (pixel art) ---
+        try {
+            File mapFile = new File("res/map-eldora.png");
+            if (mapFile.exists()) {
+                mapImage = ImageIO.read(mapFile);
+            } else {
+                mapImage = null;
+                System.err.println("Aviso: res/map-eldora.png não encontrado");
+            }
+        } catch (IOException ex) {
+            System.err.println("Erro ao carregar res/map-eldora.png: " + ex.getMessage());
+            mapImage = null;
+        }
+
         // --- Map/Canvas Area (espaço para pixel art) ---
         JPanel mapArea = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                // Fundo degradado
-                GradientPaint gp = new GradientPaint(0, 0, new Color(50, 80, 40),
-                        getWidth(), getHeight(), new Color(30, 60, 30));
-                g2d.setPaint(gp);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
+                if (mapImage != null) {
+                    // ⭐ RENDERING HINTS para PIXEL ART
+                    // Desliga anti-aliasing e usa NEAREST_NEIGHBOR para manter pixels nítidos
+                    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, 
+                        RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                        RenderingHints.VALUE_ANTIALIAS_OFF);
+                    g2d.setRenderingHint(RenderingHints.KEY_RENDERING, 
+                        RenderingHints.VALUE_RENDER_SPEED);
 
-                // Grid placeholder
-                g2d.setColor(new Color(100, 150, 100, 30));
-                g2d.setStroke(new BasicStroke(1));
-                for (int x = 0; x < getWidth(); x += 40) {
-                    g2d.drawLine(x, 0, x, getHeight());
+                    int imgWidth = mapImage.getWidth();
+                    int imgHeight = mapImage.getHeight();
+                    int panelWidth = getWidth();
+                    int panelHeight = getHeight();
+
+                    // Calcula escala mantendo proporção (prefere escala inteira para pixel art)
+                    double scaleX = panelWidth / (double) imgWidth;
+                    double scaleY = panelHeight / (double) imgHeight;
+                    double scale = Math.min(scaleX, scaleY);
+                    int intScale = Math.max(1, (int) Math.floor(scale));
+                    double finalScale = intScale;
+
+                    int drawWidth = (int) (imgWidth * finalScale);
+                    int drawHeight = (int) (imgHeight * finalScale);
+                    int x = (panelWidth - drawWidth) / 2;
+                    int y = (panelHeight - drawHeight) / 2;
+
+                    // Desenha a imagem escalada com AffineTransform
+                    AffineTransform at = AffineTransform.getTranslateInstance(x, y);
+                    at.scale(finalScale, finalScale);
+                    g2d.drawImage(mapImage, at, null);
+
+                    // Label em cima da imagem
+                    g2d.setColor(new Color(100, 100, 100, 150));
+                    g2d.setFont(new Font("Arial", Font.ITALIC, 12));
+                    g2d.drawString("Floresta de Eldoria", x + 10, y + 20);
+
+                } else {
+                    // Fallback: fundo degradado + grid (se imagem não encontrada)
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+
+                    GradientPaint gp = new GradientPaint(0, 0, new Color(50, 80, 40),
+                            getWidth(), getHeight(), new Color(30, 60, 30));
+                    g2d.setPaint(gp);
+                    g2d.fillRect(0, 0, getWidth(), getHeight());
+
+                    // Grid placeholder
+                    g2d.setColor(new Color(100, 150, 100, 30));
+                    g2d.setStroke(new BasicStroke(1));
+                    for (int xx = 0; xx < getWidth(); xx += 40) {
+                        g2d.drawLine(xx, 0, xx, getHeight());
+                    }
+                    for (int yy = 0; yy < getHeight(); yy += 40) {
+                        g2d.drawLine(0, yy, getWidth(), yy);
+                    }
+
+                    // Placeholder para sprite do personagem
+                    int centerX = getWidth() / 2;
+                    int centerY = getHeight() / 2;
+                    g2d.setColor(new Color(255, 200, 100));
+                    g2d.fillRect(centerX - 16, centerY - 32, 32, 48);
+                    g2d.setColor(new Color(200, 150, 50));
+                    g2d.drawRect(centerX - 16, centerY - 32, 32, 48);
+
+                    // Texto: espaço para pixel art
+                    g2d.setColor(new Color(150, 150, 150, 100));
+                    g2d.setFont(new Font("Arial", Font.ITALIC, 14));
+                    g2d.drawString("[SPRITE DO PERSONAGEM - Adicione pixel art em /res/]", 20, 30);
+                    g2d.drawString("Floresta de Eldoria", 20, getHeight() - 20);
                 }
-                for (int y = 0; y < getHeight(); y += 40) {
-                    g2d.drawLine(0, y, getWidth(), y);
-                }
-
-                // Placeholder para sprite do personagem
-                int centerX = getWidth() / 2;
-                int centerY = getHeight() / 2;
-                g2d.setColor(new Color(255, 200, 100));
-                g2d.fillRect(centerX - 16, centerY - 32, 32, 48);
-                g2d.setColor(new Color(200, 150, 50));
-                g2d.drawRect(centerX - 16, centerY - 32, 32, 48);
-
-                // Texto: espaço para pixel art
-                g2d.setColor(new Color(150, 150, 150, 100));
-                g2d.setFont(new Font("Arial", Font.ITALIC, 14));
-                g2d.drawString("[SPRITE DO PERSONAGEM - Adicione pixel art em /res/]", 20, 30);
-                g2d.drawString("Floresta de Eldoria", 20, getHeight() - 20);
             }
         };
         mapArea.setBackground(new Color(30, 60, 30));
