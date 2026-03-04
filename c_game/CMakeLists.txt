@@ -28,6 +28,12 @@ include(FetchContent)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.2/include.zip)
 FetchContent_MakeAvailable(json)
 
+# ===== GLM (Math Library - Header Only) =====
+FetchContent_Declare(glm
+    URL https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip
+)
+FetchContent_MakeAvailable(glm)
+
 # ===== MAIN EXECUTABLE =====
 add_executable(KronusRiftGame
     src/main.cpp
@@ -49,13 +55,20 @@ add_executable(KronusRiftGame
 
 target_include_directories(KronusRiftGame PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${nlohmann_json_SOURCE_DIR}/include
+    ${json_SOURCE_DIR}/include
+    ${glm_SOURCE_DIR}
 )
 
 target_link_libraries(KronusRiftGame PRIVATE
     raylib
-    nlohmann_json::nlohmann_json
 )
+
+# ===== COMPILER FLAGS =====
+if (MSVC)
+    target_compile_options(KronusRiftGame PRIVATE /W3 /D_CRT_SECURE_NO_WARNINGS)
+else()
+    target_compile_options(KronusRiftGame PRIVATE -Wall -Wextra)
+endif()
 
 # ===== PLATFORM-SPECIFIC =====
 if (WIN32)

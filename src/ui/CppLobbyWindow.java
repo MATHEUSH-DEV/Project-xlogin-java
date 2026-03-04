@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -32,11 +33,11 @@ public class CppLobbyWindow extends JFrame {
         this.process = process;
         this.userId = userId;
         this.characters = CharacterManager.loadCharacters(userId);
-        initUI(userId, execPath);
+        initUI(userId);
         hookProcessStreams();
     }
 
-    private void initUI(int userId, String execPath) {
+    private void initUI(int userId) {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(900, 650);
         setLocationRelativeTo(null);
@@ -316,14 +317,76 @@ public class CppLobbyWindow extends JFrame {
     }
 
     private void enterGame(Character ch) {
-        // Abre a janela do jogo - Mundo inicial
-        SwingUtilities.invokeLater(() -> {
-            game.GameWindow gameWindow = new game.GameWindow(ch, userId, this);
-            gameWindow.setVisible(true);
-        });
-        
-        // Fecha o lobby
-        this.dispose();
+        try {
+            // Path do executável C++ (ajuste conforme necessário)
+            String execPath = "c_game/build/KronusRiftGame.exe";
+            
+            // Verificar se existe em diferentes locais
+            String[] possiblePaths = {
+                execPath,
+                "./c_game/build/KronusRiftGame.exe",
+                "../c_game/build/KronusRiftGame.exe",
+                "KronusRiftGame.exe"
+            };
+            
+            File gameExe = null;
+            for (String path : possiblePaths) {
+                File f = new File(path);
+                if (f.exists()) {
+                    gameExe = f;
+                    break;
+                }
+            }
+            
+            if (gameExe == null || !gameExe.exists()) {
+                JOptionPane.showMessageDialog(this, 
+                    """
+                    Erro: Executável do jogo não encontrado!
+                    
+                    Procure em:
+                    """ + String.join("\n", possiblePaths) + """
+                    
+                    Execute: cmake && cmake --build . na pasta c_game/build""",
+                    "Game Not Found", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Enviar dados do personagem para o jogo em JSON
+            String characterJson = ch.toJSON();
+            
+            // Iniciar processo C++
+            ProcessBuilder pb = new ProcessBuilder(gameExe.getAbsolutePath());
+            pb.directory(gameExe.getParentFile());
+            
+            // Passar JSON do personagem como variável de ambiente ou arquivo temp
+            File tempCharFile = new File(System.getProperty("java.io.tmpdir"), "kronus_char_" + userId + ".json");
+            try (java.io.FileWriter fw = new java.io.FileWriter(tempCharFile)) {
+                fw.write(characterJson);
+            }
+            
+            Process gameProcess = pb.start();
+            
+            // Esperar um pouco e fechar o lobby
+            SwingUtilities.invokeLater(this::dispose);
+            
+            // Aguardar finalização do jogo
+            new Thread(() -> {
+                try {
+                    gameProcess.waitFor();
+                    // Limpar arquivo temporário
+                    tempCharFile.delete();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
+            
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, 
+                "Erro ao iniciar jogo:\n" + ex.getMessage(), 
+                "Launch Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void deleteCharacter(Character ch) {

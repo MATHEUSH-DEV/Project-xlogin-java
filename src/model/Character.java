@@ -226,6 +226,52 @@ public class Character implements Serializable {
         this.experience = experience;
     }
 
+    /**
+     * Serializa o personagem para JSON (para enviar ao C++ game).
+     */
+    public String toJSON() {
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append("  \"name\": \"").append(escapeJson(name)).append("\",\n");
+        json.append("  \"race\": \"").append(race).append("\",\n");
+        json.append("  \"class\": \"").append(clazz).append("\",\n");
+        json.append("  \"level\": ").append(level).append(",\n");
+        json.append("  \"experience\": ").append(experience).append(",\n");
+        json.append("  \"stats\": {\n");
+        json.append("    \"strength\": ").append(strength).append(",\n");
+        json.append("    \"agility\": ").append(agility).append(",\n");
+        json.append("    \"intelligence\": ").append(intelligence).append("\n");
+        json.append("  },\n");
+        json.append("  \"health\": ").append(health).append(",\n");
+        json.append("  \"mana\": ").append(mana).append(",\n");
+        json.append("  \"abilities\": [\n");
+        
+        for (int i = 0; i < abilities.size(); i++) {
+            Ability ab = abilities.get(i);
+            json.append("    {\n");
+            json.append("      \"name\": \"").append(escapeJson(ab.getName())).append("\",\n");
+            json.append("      \"description\": \"").append(escapeJson(ab.getDescription())).append("\",\n");
+            json.append("      \"manaCost\": ").append(ab.getManaCost()).append(",\n");
+            json.append("      \"damageMultiplier\": ").append(ab.getDamageMultiplier()).append(",\n");
+            json.append("      \"cooldownMs\": ").append(ab.getCooldownMs()).append("\n");
+            json.append("    }");
+            if (i < abilities.size() - 1) json.append(",");
+            json.append("\n");
+        }
+        
+        json.append("  ]\n");
+        json.append("}\n");
+        return json.toString();
+    }
+
+    private static String escapeJson(String str) {
+        if (str == null) return "";
+        return str.replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
+                  .replace("\n", "\\n")
+                  .replace("\r", "\\r");
+    }
+
     @Override
     public String toString() {
         return String.format("Character{name='%s', race='%s', class='%s', level=%d, STR=%d, AGI=%d, INT=%d}", 

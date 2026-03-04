@@ -1,13 +1,8 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <memory>
 #include <string>
-
-// Forward declarations
-class Player;
-class Enemy;
-class GameWorld;
+#include <fstream>
 
 /**
  * Asset Manager para carregar e cachear recursos
