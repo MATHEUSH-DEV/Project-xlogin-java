@@ -1,10 +1,5 @@
 package ui;
 
-import model.Character;
-import util.CharacterManager;
-import game.GameWindow;
-
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -14,6 +9,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
+import javax.swing.*;
+import model.Character;
+import util.CharacterManager;
 
 /**
  * Janela de Lobby do Kronus Rift estilo WoW.
@@ -56,7 +54,7 @@ public class CppLobbyWindow extends JFrame {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
         titleLabel.setForeground(new Color(255, 200, 100));
 
-        JLabel subtitleLabel = new JLabel("Bem-vindo ao Lobby - Criação e Gerenciamento de Personagens");
+        JLabel subtitleLabel = new JLabel("Bem-vindo ao Lobby - Kronus Rift MMORPG ");
         subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 13));
         subtitleLabel.setForeground(new Color(150, 150, 150));
 
@@ -80,7 +78,7 @@ public class CppLobbyWindow extends JFrame {
         characterListPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         JLabel charactersLabel = new JLabel("Seus Personagens:");
-        charactersLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        charactersLabel.setFont(new Font("Arial", Font.BOLD, 22));
         charactersLabel.setForeground(new Color(255, 200, 100));
 
         JScrollPane scrollArea = new JScrollPane(characterListPanel);
@@ -161,7 +159,7 @@ public class CppLobbyWindow extends JFrame {
 
         // Raça
         JLabel raceLabel = new JLabel("Raça:");
-        raceLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        raceLabel.setFont(new Font("Arial", Font.BOLD, 22));
         raceLabel.setForeground(new Color(200, 200, 200));
         raceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(raceLabel);
@@ -176,7 +174,7 @@ public class CppLobbyWindow extends JFrame {
 
         // Classe
         JLabel classLabel = new JLabel("Classe:");
-        classLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        classLabel.setFont(new Font("Arial", Font.BOLD, 22));
         classLabel.setForeground(new Color(200, 200, 200));
         classLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(classLabel);
