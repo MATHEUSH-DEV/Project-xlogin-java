@@ -293,43 +293,44 @@ public class GameWindow extends JFrame {
         panel.add(enemiesLabel);
         panel.add(Box.createVerticalStrut(20));
 
-        // --- Combat Buttons ---
-        JLabel combatTitle = new JLabel("⚔️ Combate");
-        combatTitle.setFont(new Font("Arial", Font.BOLD, 14));
-        combatTitle.setForeground(new Color(255, 150, 100));
-        combatTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(combatTitle);
+        // --- Informações Adicionais ---
+        JLabel infoLabel = new JLabel("ℹ️ Informações");
+        infoLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        infoLabel.setForeground(new Color(100, 200, 255));
+        infoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(infoLabel);
         panel.add(Box.createVerticalStrut(8));
 
-        JButton fightButton = new JButton("Lutar contra Inimigo");
-        fightButton.setFont(new Font("Arial", Font.BOLD, 12));
-        fightButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-        fightButton.setBackground(new Color(200, 50, 50));
-        fightButton.setForeground(Color.WHITE);
-        fightButton.setFocusPainted(false);
-        fightButton.addActionListener(e -> fight());
-        panel.add(fightButton);
+        // Experience/Level Up Info
+        JLabel xpInfo = new JLabel("<html>⭐ XP até próx. nível:<br/>250 / 500</html>");
+        xpInfo.setFont(new Font("Arial", Font.PLAIN, 11));
+        xpInfo.setForeground(new Color(255, 200, 50));
+        xpInfo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(xpInfo);
         panel.add(Box.createVerticalStrut(8));
 
-        JButton healButton = new JButton("Descansar (Curar)");
-        healButton.setFont(new Font("Arial", Font.BOLD, 12));
-        healButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-        healButton.setBackground(new Color(100, 150, 100));
-        healButton.setForeground(Color.WHITE);
-        healButton.setFocusPainted(false);
-        healButton.addActionListener(e -> rest());
-        panel.add(healButton);
-        panel.add(Box.createVerticalStrut(20));
+        // Armor/Defense Info
+        JLabel defenseInfo = new JLabel("<html>🛡️ Defesa: +5<br/>Resistência: Normal</html>");
+        defenseInfo.setFont(new Font("Arial", Font.PLAIN, 11));
+        defenseInfo.setForeground(new Color(150, 200, 150));
+        defenseInfo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(defenseInfo);
+        panel.add(Box.createVerticalStrut(8));
 
-        // --- Exit Button ---
-        JButton exitButton = new JButton("Sair do Jogo");
-        exitButton.setFont(new Font("Arial", Font.BOLD, 12));
-        exitButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-        exitButton.setBackground(new Color(100, 100, 150));
-        exitButton.setForeground(Color.WHITE);
-        exitButton.setFocusPainted(false);
-        exitButton.addActionListener(e -> saveAndExit());
-        panel.add(exitButton);
+        // Elemental Info
+        JLabel elementalInfo = new JLabel("<html>🔥 Elemento: Fogo<br/>Bônus: +10% dano</html>");
+        elementalInfo.setFont(new Font("Arial", Font.PLAIN, 11));
+        elementalInfo.setForeground(new Color(255, 150, 100));
+        elementalInfo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(elementalInfo);
+        panel.add(Box.createVerticalStrut(8));
+
+        // Status Effect Info
+        JLabel statusInfo = new JLabel("<html>✨ Status Ativo:<br/>Nenhum efeito negativo</html>");
+        statusInfo.setFont(new Font("Arial", Font.PLAIN, 11));
+        statusInfo.setForeground(new Color(150, 255, 200));
+        statusInfo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(statusInfo);
 
         panel.add(Box.createVerticalGlue());
 
