@@ -78,7 +78,7 @@ public class CppLobbyWindow extends JFrame {
         characterListPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         JLabel charactersLabel = new JLabel("Seus Personagens:");
-        charactersLabel.setFont(new Font("Arial", Font.BOLD, 22));
+        charactersLabel.setFont(new Font("Arial", Font.BOLD, 20));
         charactersLabel.setForeground(new Color(255, 200, 100));
 
         JScrollPane scrollArea = new JScrollPane(characterListPanel);
@@ -134,7 +134,7 @@ public class CppLobbyWindow extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
         JLabel creationTitle = new JLabel("Criar Novo Personagem");
-        creationTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        creationTitle.setFont(new Font("Arial", Font.BOLD, 20));
         creationTitle.setForeground(new Color(255, 200, 100));
         creationTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -143,7 +143,7 @@ public class CppLobbyWindow extends JFrame {
 
         // Nome
         JLabel nameLabel = new JLabel("Nome do Personagem:");
-        nameLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 20));
         nameLabel.setForeground(new Color(200, 200, 200));
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(nameLabel);
@@ -159,7 +159,7 @@ public class CppLobbyWindow extends JFrame {
 
         // Raça
         JLabel raceLabel = new JLabel("Raça:");
-        raceLabel.setFont(new Font("Arial", Font.BOLD, 22));
+        raceLabel.setFont(new Font("Arial", Font.BOLD, 20));
         raceLabel.setForeground(new Color(200, 200, 200));
         raceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(raceLabel);
@@ -174,7 +174,7 @@ public class CppLobbyWindow extends JFrame {
 
         // Classe
         JLabel classLabel = new JLabel("Classe:");
-        classLabel.setFont(new Font("Arial", Font.BOLD, 22));
+        classLabel.setFont(new Font("Arial", Font.BOLD, 20));
         classLabel.setForeground(new Color(200, 200, 200));
         classLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(classLabel);
