@@ -1,5 +1,7 @@
 #include "systems/CombatSystem.hpp"
 #include <random>
+#include <algorithm>
+#include <chrono>
 
 std::vector<CombatSystem::CombatLog> CombatSystem::logs;
 

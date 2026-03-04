@@ -4,9 +4,9 @@ UIManager::UIManager()
     : hud(std::make_unique<HUD>()) {
 }
 
-void UIManager::update(const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies) {
+void UIManager::update(const Player& player) {
     if (hudVisible && hud) {
-        hud->update(player, enemies);
+        hud->update(player);
     }
 }
 

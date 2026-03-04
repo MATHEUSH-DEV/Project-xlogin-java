@@ -1,4 +1,5 @@
 #include "game/Game.hpp"
+#include "systems/CombatSystem.hpp"
 #include <raylib.h>
 #include <iostream>
 
@@ -85,7 +86,7 @@ void Game::handleInput() {
 
 void Game::update() {
     world->update(deltaTime);
-    uiManager->update(*world->getPlayer(), world->getEnemies());
+    uiManager->update(*world->getPlayer());
 }
 
 void Game::render() {

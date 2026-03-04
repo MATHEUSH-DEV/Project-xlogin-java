@@ -1,4 +1,5 @@
 #include "entities/Player.hpp"
+#include <raylib.h>
 #include <nlohmann/json.hpp>
 #include <cmath>
 

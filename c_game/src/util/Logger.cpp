@@ -1,18 +1,15 @@
-#include "util/AssetManager.hpp"
+#include "util/Logger.hpp"
 #include <iostream>
 #include <fstream>
 #include <ctime>
 #include <iomanip>
-
-/**
- * Logger para debug e error reporting
- */
+#include <sstream>
 
 std::string Logger::levelToString(Level level) {
     switch (level) {
         case Level::DEBUG:    return "[DEBUG]";
         case Level::INFO:     return "[INFO]";
-        case Level::WARNING:  return "[WARN]";
+        case Level::WARN:     return "[WARN]";
         case Level::ERROR:    return "[ERROR]";
         case Level::CRITICAL: return "[CRITICAL]";
         default:              return "[UNKNOWN]";
@@ -44,7 +41,7 @@ void Logger::info(const std::string& msg) {
 }
 
 void Logger::warn(const std::string& msg) {
-    log(Level::WARNING, msg);
+    log(Level::WARN, msg);
 }
 
 void Logger::error(const std::string& msg) {

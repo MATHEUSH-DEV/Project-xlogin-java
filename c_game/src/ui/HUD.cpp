@@ -10,7 +10,7 @@ HUD::HUD() {
     addLogMessage("Clique para se mover, 1-4 para usar habilidades");
 }
 
-void HUD::update(const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies) {
+void HUD::update(const Player& player) {
     // Update logic can go here
 }
 

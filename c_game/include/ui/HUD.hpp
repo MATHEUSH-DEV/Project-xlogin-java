@@ -14,7 +14,7 @@ class HUD {
 public:
     HUD();
     
-    void update(const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies);
+    void update(const Player& player);
     void render(const Player& player);
     
     void addLogMessage(const std::string& message);

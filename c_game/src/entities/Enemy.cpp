@@ -94,7 +94,7 @@ void Enemy::render() {
         static_cast<int>(position.x - 25),
         static_cast<int>(position.y - 40),
         50, 5,
-        DARKRED
+        MAROON
     );
     int healthWidth = static_cast<int>(50.0f * health / maxHealth);
     DrawRectangle(
