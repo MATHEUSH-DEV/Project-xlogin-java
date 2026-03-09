@@ -2,19 +2,10 @@ package service;
 
 import java.io.File;
 import java.io.IOException;
+import model.Character;
 
-/**
- * Substitui o launcher original do .NET/Avalonia por um launcher que inicia
- * um binário C++ localizado em `c_lobby/`.
- * O binário recebido é executável simples que aceita o userId como argumento.
- */
 public class GameLauncher {
 
-    /**
-     * Inicia o processo do Lobby C++ de forma assíncrona.
-     * Procura por `c_lobby/lobby` (unix) ou `c_lobby\\lobby.exe` (windows).
-     * @param userId O ID do jogador vindo do banco de dados.
-     */
     public static void launchLobby(int userId) throws IOException {
         String os = System.getProperty("os.name").toLowerCase();
         String lobbyPath;
@@ -24,7 +15,6 @@ public class GameLauncher {
             lobbyPath = "./c_lobby/lobby";
         }
 
-        // Verifica se o executável existe antes de tentar executar.
         File execFile = new File(System.getProperty("user.dir"), lobbyPath);
         if (!execFile.exists()) {
             throw new IOException(
@@ -35,13 +25,23 @@ public class GameLauncher {
 
         ProcessBuilder pb = new ProcessBuilder(execFile.getAbsolutePath(), String.valueOf(userId));
         pb.directory(new File(System.getProperty("user.dir")));
-        // Inicia o processo e conecta seus streams a uma janela Swing que exibirá a saída
         Process process = pb.start();
         System.out.println("[Launcher] C++ Lobby iniciado para o User: " + userId + " usando: " + execFile.getAbsolutePath());
-        // Abre a janela do lobby em uma thread de evento Swing
+        
         javax.swing.SwingUtilities.invokeLater(() -> {
             ui.CppLobbyWindow window = new ui.CppLobbyWindow(process, userId, execFile.getAbsolutePath());
             window.setVisible(true);
         });
+    }
+
+    public static void launchGame(int userId, String characterName) {
+        Character character = util.CharacterManager.getCharacterByName(userId, characterName);
+        if (character == null) {
+            javax.swing.JOptionPane.showMessageDialog(null, "Personagem não encontrado!", "Erro", javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        game.GameWindow gameWindow = new game.GameWindow(character, userId, null);
+        gameWindow.setVisible(true);
+        System.out.println("[GameLauncher] Jogo iniciado para: " + characterName);
     }
 }

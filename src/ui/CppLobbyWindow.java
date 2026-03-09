@@ -318,77 +318,13 @@ public class CppLobbyWindow extends JFrame {
 
     private void enterGame(Character ch) {
         try {
-            // Path do executável C++ (ajuste conforme necessário)
-            String execPath = "c_game/build/KronusRiftGame.exe";
-            
-            // Verificar se existe em diferentes locais
-            String[] possiblePaths = {
-                execPath,
-                "./c_game/build/KronusRiftGame.exe",
-                "../c_game/build/KronusRiftGame.exe",
-                "KronusRiftGame.exe"
-            };
-            
-            File gameExe = null;
-            for (String path : possiblePaths) {
-                File f = new File(path);
-                if (f.exists()) {
-                    gameExe = f;
-                    break;
-                }
-            }
-            
-            if (gameExe == null || !gameExe.exists()) {
-                JOptionPane.showMessageDialog(this, 
-                    """
-                    Erro: Executável do jogo não encontrado!
-                    
-                    Procure em:
-                    """ + String.join("\n", possiblePaths) + """
-                    
-                    Execute: cmake && cmake --build . na pasta c_game/build""",
-                    "Game Not Found", 
-                    JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            
-            // Enviar dados do personagem para o jogo em JSON
-            String characterJson = ch.toJSON();
-            
-            // Iniciar processo C++
-            ProcessBuilder pb = new ProcessBuilder(gameExe.getAbsolutePath());
-            pb.directory(gameExe.getParentFile());
-            
-            // Passar JSON do personagem como variável de ambiente ou arquivo temp
-            File tempCharFile = new File(System.getProperty("java.io.tmpdir"), "kronus_char_" + userId + ".json");
-            try (java.io.FileWriter fw = new java.io.FileWriter(tempCharFile)) {
-                fw.write(characterJson);
-            }
-            
-            Process gameProcess = pb.start();
-            
-            // Esperar um pouco e fechar o lobby
-            SwingUtilities.invokeLater(this::dispose);
-            
-            // Aguardar finalização do jogo
-            new Thread(() -> {
-                try {
-                    gameProcess.waitFor();
-                    // Limpar arquivo temporário
-                    tempCharFile.delete();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }).start();
-            
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, 
-                "Erro ao iniciar jogo:\n" + ex.getMessage(), 
-                "Launch Error", 
-                JOptionPane.ERROR_MESSAGE);
+            service.GameLauncher.launchGame(userId, ch.getName());
+            this.setVisible(false);
+            this.dispose();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao iniciar jogo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
+    } 
     private void deleteCharacter(Character ch) {
         int confirm = JOptionPane.showConfirmDialog(this, 
                 "Tem certeza que deseja deletar o personagem " + ch.getName() + "?", 
