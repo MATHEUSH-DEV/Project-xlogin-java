@@ -6,6 +6,8 @@ Este repositório contém o cliente de login/registro para o jogo **Kronus Rift*
 
 ## 🚀 Visão geral do sistema
 
+
+
 - **Front-end**: Telas de login e cadastro desenvolvidas com Java Swing.
 - **Banco de dados**: SQLite (`kronus_local.db`) armazenando informações de usuários.
 - **Segurança**: Senhas hashadas com `BCrypt` (custo 12) através da classe `PasswordHasher`.
