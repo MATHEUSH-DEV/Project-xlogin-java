@@ -24,6 +24,9 @@ coverage/
 *.swp
 *.swo
 thumbs.db
+character_data/
+characters.db
+
 *.exe
 *.dll
 *.so
