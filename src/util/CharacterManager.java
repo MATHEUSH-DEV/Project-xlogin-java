@@ -23,8 +23,9 @@ public class CharacterManager {
         List<Character> characters = new ArrayList<>();
         String sql = "SELECT name, race, clazz, level, strength, agility, intelligence, health, mana, experience FROM characters WHERE user_id = ? ORDER BY created_at DESC";
         
-        try (Connection conn = DatabaseSQLite.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = DatabaseSQLite.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);
             
@@ -51,6 +52,7 @@ public class CharacterManager {
                     characters.add(ch);
                 }
             }
+            ps.close(); // Fecha PreparedStatement mas não a conexão
             
             System.out.println("✓ Carregados " + characters.size() + " personagens do usuário " + userId);
             
@@ -71,8 +73,9 @@ public class CharacterManager {
     public static void addCharacter(int userId, Character ch) throws IOException {
         String sql = "INSERT INTO characters (user_id, name, race, clazz, level, strength, agility, intelligence, health, mana, experience) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         
-        try (Connection conn = DatabaseSQLite.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = DatabaseSQLite.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);
             ps.setString(2, ch.getName());
@@ -87,6 +90,8 @@ public class CharacterManager {
             ps.setLong(11, ch.getExperience());
             
             int inserted = ps.executeUpdate();
+            ps.close();
+            
             if (inserted > 0) {
                 System.out.println("✓ Personagem '" + ch.getName() + "' criado com sucesso!");
             }
@@ -109,8 +114,9 @@ public class CharacterManager {
     public static void updateCharacter(int userId, Character ch) throws IOException {
         String sql = "UPDATE characters SET level=?, strength=?, agility=?, intelligence=?, health=?, mana=?, experience=? WHERE user_id=? AND name=?";
         
-        try (Connection conn = DatabaseSQLite.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = DatabaseSQLite.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, ch.getLevel());
             ps.setInt(2, ch.getStrength());
@@ -123,6 +129,8 @@ public class CharacterManager {
             ps.setString(9, ch.getName());
             
             int updated = ps.executeUpdate();
+            ps.close();
+            
             if (updated > 0) {
                 System.out.println("✓ Personagem '" + ch.getName() + "' atualizado! Level: " + ch.getLevel() + " | XP: " + ch.getExperience());
             }
@@ -141,13 +149,16 @@ public class CharacterManager {
     public static void deleteCharacter(int userId, String name) throws IOException {
         String sql = "DELETE FROM characters WHERE user_id=? AND name=?";
         
-        try (Connection conn = DatabaseSQLite.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = DatabaseSQLite.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);
             ps.setString(2, name);
             
             int deleted = ps.executeUpdate();
+            ps.close();
+            
             if (deleted > 0) {
                 System.out.println("✓ Personagem '" + name + "' deletado com sucesso!");
             }
@@ -167,14 +178,17 @@ public class CharacterManager {
     public static boolean characterNameExists(int userId, String name) {
         String sql = "SELECT 1 FROM characters WHERE user_id=? AND name=? LIMIT 1";
         
-        try (Connection conn = DatabaseSQLite.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = DatabaseSQLite.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);
             ps.setString(2, name);
             
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
+                boolean exists = rs.next();
+                ps.close();
+                return exists;
             }
         } catch (SQLException e) {
             System.err.println("✗ Erro ao verificar nome: " + e.getMessage());
@@ -204,8 +218,9 @@ public class CharacterManager {
     public static Character getCharacterByName(int userId, String name) {
         String sql = "SELECT id, name, race, clazz, level, strength, agility, intelligence, health, mana, experience FROM characters WHERE user_id=? AND name=? LIMIT 1";
         
-        try (Connection conn = DatabaseSQLite.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = DatabaseSQLite.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);
             ps.setString(2, name);
@@ -228,9 +243,11 @@ public class CharacterManager {
                         rs.getLong("experience")
                     );
                     
+                    ps.close();
                     return ch;
                 }
             }
+            ps.close();
         } catch (SQLException e) {
             System.err.println("✗ Erro ao carregar personagem: " + e.getMessage());
         }
@@ -246,16 +263,20 @@ public class CharacterManager {
     public static int countCharacters(int userId) {
         String sql = "SELECT COUNT(*) FROM characters WHERE user_id=?";
         
-        try (Connection conn = DatabaseSQLite.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            Connection conn = DatabaseSQLite.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);
             
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1);
+                    int count = rs.getInt(1);
+                    ps.close();
+                    return count;
                 }
             }
+            ps.close();
         } catch (SQLException e) {
             System.err.println("✗ Erro ao contar personagens: " + e.getMessage());
         }

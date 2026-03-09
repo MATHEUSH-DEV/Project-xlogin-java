@@ -17,7 +17,20 @@ public class DatabaseSQLite {
             
             // Cria/conecta ao banco (arquivo local)
             String dbPath = "kronus_data/characters.db";
-            connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+            String url = "jdbc:sqlite:" + dbPath;
+            
+            // Cria conexão com propriedades importantes
+            java.util.Properties props = new java.util.Properties();
+            props.setProperty("journal_mode", "WAL");  // Write-Ahead Logging
+            
+            connection = DriverManager.getConnection(url, props);
+            
+            // Configurações para melhor performance e confiabilidade
+            try (Statement stmt = connection.createStatement()) {
+                stmt.execute("PRAGMA foreign_keys = ON");
+                stmt.execute("PRAGMA synchronous = NORMAL");
+                stmt.execute("PRAGMA cache_size = 10000");
+            }
             
             System.out.println("✓ ============================================");
             System.out.println("✓ Conectado ao SQLite: " + dbPath);
@@ -60,9 +73,12 @@ public class DatabaseSQLite {
     }
 
     /**
-     * Obtém conexão com banco de dados.
+     * Obtém conexão com banco de dados (reutiliza a mesma conexão).
      */
-    public static Connection getConnection() {
+    public static Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            throw new SQLException("Conexão SQLite não foi inicializada corretamente");
+        }
         return connection;
     }
 
