@@ -1,0 +1,258 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                ║
+║                 🗄️ GUIA PASSO-A-PASSO: CONECTAR JAVA + MySQL               ║
+║                                                                                ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+RESUMO DO QUE FOI FEITO:
+========================
+
+✓ Criados arquivos Java para conexão MySQL:
+  • src/util/Database.java          (gerenciador de pool de conexões com HikariCP)
+  • src/util/CharacterManager.java  (novo com métodos MySQL)
+
+✓ Criados arquivos de configuração:
+  • src/main/resources/db.properties (credenciais do banco)
+  • setup_banco.sql                  (script SQL para criar banco)
+
+✓ Baixados JARs necessários:
+  • mysql-connector-java-5.1.49.jar
+  • HikariCP-5.0.1.jar
+
+✓ Compilado com sucesso! (0 erros)
+
+
+PASSO 1: ABRIR MySQL WORKBENCH
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Abra MySQL Workbench (já aberto para você)
+2. Veja a janela com:
+   - Navigator (esquerda)
+   - SQL Editor (centro)
+   - Output (embaixo)
+
+
+PASSO 2: CRIAR CONEXÃO (se não tiver)
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Clique em "Database" (menu superior)
+2. Selecione "Manage Connections..."
+3. Clique em "+" para nova conexão
+4. Preencha:
+   - Connection Name: localhost (ou kronus)
+   - Connection Method: Standard (TCP/IP)
+   - Hostname: localhost ou 127.0.0.1
+   - Port: 3306
+   - Username: root (seu usuário MySQL)
+   - Password: (sua senha do MySQL)
+5. Clique "Test Connection" para testar
+6. Clique "OK"
+
+
+PASSO 3: EXECUTAR SCRIPT SQL
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Copie o conteúdo do arquivo: setup_banco.sql
+
+   Localização: D:\xlogin-project-java\Project-xlogin-java\setup_banco.sql
+
+2. No MySQL Workbench:
+   • Clique em "File" → "Open SQL Script"
+   • Ou Cole o código manualmente em uma nova aba
+
+3. Selecione TUDO o código (Ctrl+A)
+
+4. Execute clicando em:
+   • Lightning bolt icon (⚡) na toolbar
+   • Ou Ctrl+Shift+Enter
+
+5. Você deve ver na saída (Output):
+   ✓ Banco kronus criado!
+   ✓ Usuário kronus_user criado!
+   ✓ Tabela characters criada!
+   ✓ Tabela usuarios criada!
+
+
+PASSO 4: VERIFICAR NO MySQL WORKBENCH
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Na esquerda, clique em "Schemas"
+2. Clique botão refresh (circular)
+3. Você deve ver: kronus (banco novo)
+4. Expanda kronus → Tables
+5. Você deve ver:
+   • characters
+   • usuarios
+
+
+PASSO 5: TESTAR CONEXÃO DO JAVA
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Abra Terminal / PowerShell
+2. Vá para a pasta do projeto:
+   cd D:\xlogin-project-java\Project-xlogin-java
+
+3. Execute a aplicação:
+   java -cp "lib/*;out" ui.Xlogin
+
+4. Na saída, você DEVE VER:
+   ✓ ============================================
+   ✓ Conexão com banco de dados MySQL estabelecida!
+   ✓ Banco: kronus
+   ✓ Host: localhost:3306
+   ✓ Pool Size: 10
+   ✓ ============================================
+
+   Se vir isso → ✅ CONECTOU COM SUCESSO!
+   Se der erro → ❌ Verifique os passos abaixo
+
+
+POSSÍVEIS ERROS E SOLUÇÕES
+═══════════════════════════════════════════════════════════════════════════════
+
+ERRO 1: "Access denied for user 'kronus_user'@'localhost'"
+═════════════════════════════════════════════════════════════
+
+Solução:
+1. Verifique a senha em: src/main/resources/db.properties
+2. Padrão é: senha_forte
+3. Se a senha do seu MySQL é diferente:
+   • Abra db.properties
+   • Mude a linha: db.password=sua_senha_aqui
+   • Recompile: javac -cp "lib/*" -d out src/**/*.java
+   • Execute novamente
+
+ERRO 2: "No suitable driver found for jdbc:mysql://..."
+═════════════════════════════════════════════════════════
+
+Solução:
+1. Verificar se os JARs estão em lib/:
+   • mysql-connector-java-5.1.49.jar
+   • HikariCP-5.0.1.jar
+2. Se faltar, rode: instalar_jars.bat (no projeto raiz)
+
+ERRO 3: "Communications link failure"
+═════════════════════════════════════
+
+Solução:
+1. MySQL Server não está rodando
+2. Abra MySQL Command Line Client ou MySQL Shell e verifique
+3. No Windows: Services → MySQL80 deve estar rodando
+4. Ou: net start MySQL80 (Command Prompt como admin)
+
+ERRO 4: "Unknown database 'kronus'"
+═════════════════════════════════════
+
+Solução:
+1. Você não executou o script SQL ainda
+2. Execute o setup_banco.sql no MySQL Workbench (Passo 3)
+
+ERRO 5: "com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Exception..."
+═════════════════════════════════════════════════════════════════════════
+
+Solução:
+1. Verifique as credenciais do banco
+2. Verifique se o MySQL está rodando
+3. Tente conectar manualmente no Workbench
+
+
+PRÓXIMOS PASSOS APÓS CONECTAR
+═════════════════════════════════════════════════════════════════════════════
+
+1. Teste o fluxo completo:
+   • Faça login: teteu / senha123
+   • Crie um personagem novo
+   • Entre no jogo
+   • Saia do jogo
+   
+2. Volte no MySQL Workbench e execute:
+   USE kronus;
+   SELECT * FROM characters;
+   
+   Você deve ver seu personagem criado!
+
+3. Verifique o level/stats:
+   SELECT name, race, clazz, level, experience FROM characters;
+
+
+VERIFICAÇÃO RÁPIDA NO MYSQL WORKBENCH
+═════════════════════════════════════════════════════════════════════════════
+
+Abra uma nova query no Workbench e execute:
+
+--- Verificar banco existe
+SHOW DATABASES;
+
+--- Verificar usuário existe
+SELECT user FROM mysql.user;
+
+--- Ver estrutura das tabelas
+USE kronus;
+SHOW TABLES;
+DESC characters;
+DESC usuarios;
+
+--- Contar personagens
+SELECT COUNT(*) as total_characters FROM characters;
+SELECT COUNT(*) as total_users FROM usuarios;
+
+
+ARQUIVO DE CONFIGURAÇÃO
+═════════════════════════════════════════════════════════════════════════════
+
+Localização: src/main/resources/db.properties
+
+Conteúdo padrão:
+────────────────────────────────────────────────────────────────────────────
+db.url=jdbc:mysql://localhost:3306/kronus?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+db.user=kronus_user
+db.password=senha_forte
+db.poolSize=10
+────────────────────────────────────────────────────────────────────────────
+
+Se precisar alterar:
+• db.url: mude se o MySQL está em outro host/porta
+• db.user: mude se o usuário é diferente
+• db.password: mude se a senha é diferente
+• db.poolSize: mude se quer mais/menos conexões simultâneas
+
+
+MÉTODOS DISPONÍVEIS NO CharacterManager
+═════════════════════════════════════════════════════════════════════════════
+
+Após conectar, pode usar:
+
+1. loadCharacters(userId)
+   - Carrega todos personagens do usuário
+
+2. addCharacter(userId, character)
+   - Cria novo personagem no banco
+
+3. updateCharacter(userId, character)
+   - Salva progresso (level, exp, hp, mana)
+
+4. deleteCharacter(userId, name)
+   - Deleta um personagem
+
+5. characterNameExists(userId, name)
+   - Verifica se nome já existe
+
+6. getCharacterByName(userId, name)
+   - Carrega um personagem específico
+
+7. countCharacters(userId)
+   - Conta quantos personagens tem
+
+
+TUDO PRONTO!
+═════════════════════════════════════════════════════════════════════════════
+
+Agora:
+✓ Database.java conecta ao MySQL com HikariCP
+✓ CharacterManager usa banco em vez de JSON
+✓ Credenciais em db.properties
+✓ Script SQL pronto para criar banco
+
+Próximo: Executar setup_banco.sql no MySQL Workbench! ✓
+
+═════════════════════════════════════════════════════════════════════════════

@@ -2,162 +2,264 @@ package util;
 
 import model.Character;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Gerencia persistência de personagens em arquivo JSON simples.
+ * Gerencia persistência de personagens em banco de dados SQLite.
+ * Banco de dados portável sem necessidade de servidor.
+ * Arquivo: kronus_data/characters.db
  */
 public class CharacterManager {
-    private static final String CHARACTERS_DIR = "characters";
-
-    static {
-        new File(CHARACTERS_DIR).mkdirs();
-    }
 
     /**
-     * Salva os personagens de um usuário em JSON.
-     */
-    public static void saveCharacters(int userId, List<Character> characters) throws IOException {
-        File file = getCharacterFile(userId);
-        StringBuilder json = new StringBuilder("[\n");
-        for (int i = 0; i < characters.size(); i++) {
-            Character ch = characters.get(i);
-            json.append("  {\n");
-            json.append("    \"name\": \"").append(ch.getName()).append("\",\n");
-            json.append("    \"race\": \"").append(ch.getRace()).append("\",\n");
-            json.append("    \"clazz\": \"").append(ch.getClazz()).append("\",\n");
-            json.append("    \"level\": ").append(ch.getLevel()).append(",\n");
-            json.append("    \"strength\": ").append(ch.getStrength()).append(",\n");
-            json.append("    \"agility\": ").append(ch.getAgility()).append(",\n");
-            json.append("    \"intelligence\": ").append(ch.getIntelligence()).append(",\n");
-            json.append("    \"health\": ").append(ch.getHealth()).append(",\n");
-            json.append("    \"mana\": ").append(ch.getMana()).append(",\n");
-            json.append("    \"experience\": ").append(ch.getExperience()).append(",\n");
-            json.append("    \"createdAt\": ").append(ch.getCreatedAt()).append("\n");
-            json.append("  }");
-            if (i < characters.size() - 1) json.append(",");
-            json.append("\n");
-        }
-        json.append("]");
-        Files.write(file.toPath(), json.toString().getBytes());
-    }
-
-    /**
-     * Carrega os personagens de um usuário do JSON.
+     * MÉTODO 1: Carrega todos os personagens de um usuário do banco.
+     * @param userId ID do usuário
+     * @return Lista de personagens
      */
     public static List<Character> loadCharacters(int userId) {
-        File file = getCharacterFile(userId);
-        if (!file.exists()) {
-            return new ArrayList<>();
-        }
         List<Character> characters = new ArrayList<>();
-        try {
-            String content = new String(Files.readAllBytes(file.toPath()));
-            content = content.trim();
-            if (content.startsWith("[") && content.endsWith("]")) {
-                content = content.substring(1, content.length() - 1);
-                String[] blocks = content.split("\\},\\s*\\{");
-                for (String block : blocks) {
-                    block = block.replace("{", "").replace("}", "").trim();
-                    if (block.isEmpty()) continue;
+        String sql = "SELECT name, race, clazz, level, strength, agility, intelligence, health, mana, experience FROM characters WHERE user_id = ? ORDER BY created_at DESC";
+        
+        try (Connection conn = DatabaseSQLite.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    // Criar personagem com dados básicos
+                    Character ch = new Character(
+                        rs.getString("name"),
+                        rs.getString("race"),
+                        rs.getString("clazz")
+                    );
                     
-                    String name = extractJsonValue(block, "name");
-                    String race = extractJsonValue(block, "race");
-                    String clazz = extractJsonValue(block, "clazz");
+                    // Restaurar stats do banco de dados
+                    ch.restoreStats(
+                        rs.getInt("level"),
+                        rs.getInt("strength"),
+                        rs.getInt("agility"),
+                        rs.getInt("intelligence"),
+                        rs.getInt("health"),
+                        rs.getInt("mana"),
+                        rs.getLong("experience")
+                    );
                     
-                    if (!name.isEmpty() && !race.isEmpty() && !clazz.isEmpty()) {
-                        Character character = new Character(name, race, clazz);
-                        
-                        // Carregar stats adicionais se existirem
-                        String levelStr = extractJsonNumberValue(block, "level");
-                        String strStr = extractJsonNumberValue(block, "strength");
-                        String agiStr = extractJsonNumberValue(block, "agility");
-                        String intStr = extractJsonNumberValue(block, "intelligence");
-                        String healthStr = extractJsonNumberValue(block, "health");
-                        String manaStr = extractJsonNumberValue(block, "mana");
-                        String expStr = extractJsonNumberValue(block, "experience");
-                        
-                        // Se tiver dados de level, restaurar os stats
-                        if (!levelStr.isEmpty()) {
-                            try {
-                                int level = Integer.parseInt(levelStr);
-                                int str = Integer.parseInt(strStr);
-                                int agi = Integer.parseInt(agiStr);
-                                int intel = Integer.parseInt(intStr);
-                                int health = Integer.parseInt(healthStr);
-                                int mana = Integer.parseInt(manaStr);
-                                long exp = Long.parseLong(expStr);
-                                
-                                // Aplicar stats carregados
-                                character.restoreStats(level, str, agi, intel, health, mana, exp);
-                            } catch (NumberFormatException e) {
-                                // Se falhar, usar stats padrão
-                            }
-                        }
-                        
-                        characters.add(character);
-                    }
+                    characters.add(ch);
                 }
             }
-        } catch (IOException e) {
-            // Retornar lista vazia em caso de erro
+            
+            System.out.println("✓ Carregados " + characters.size() + " personagens do usuário " + userId);
+            
+        } catch (SQLException e) {
+            System.err.println("✗ Erro ao carregar personagens: " + e.getMessage());
+            e.printStackTrace();
         }
+        
         return characters;
     }
 
     /**
-     * Verifica se um nome de personagem já existe para o usuário.
+     * MÉTODO 2: Adiciona um novo personagem ao banco.
+     * @param userId ID do usuário
+     * @param ch Personagem a ser adicionado
+     * @throws IOException Se ocorrer erro (nome duplicado, etc)
      */
-    public static boolean characterNameExists(int userId, String characterName) {
-        List<Character> characters = loadCharacters(userId);
-        return characters.stream().anyMatch(c -> c.getName().equalsIgnoreCase(characterName));
+    public static void addCharacter(int userId, Character ch) throws IOException {
+        String sql = "INSERT INTO characters (user_id, name, race, clazz, level, strength, agility, intelligence, health, mana, experience) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        
+        try (Connection conn = DatabaseSQLite.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            ps.setString(2, ch.getName());
+            ps.setString(3, ch.getRace());
+            ps.setString(4, ch.getClazz());
+            ps.setInt(5, ch.getLevel());
+            ps.setInt(6, ch.getStrength());
+            ps.setInt(7, ch.getAgility());
+            ps.setInt(8, ch.getIntelligence());
+            ps.setInt(9, ch.getHealth());
+            ps.setInt(10, ch.getMana());
+            ps.setLong(11, ch.getExperience());
+            
+            int inserted = ps.executeUpdate();
+            if (inserted > 0) {
+                System.out.println("✓ Personagem '" + ch.getName() + "' criado com sucesso!");
+            }
+            
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE")) {
+                throw new IOException("✗ Este nome de personagem já existe!");
+            }
+            throw new IOException("✗ Erro ao criar personagem: " + e.getMessage());
+        }
     }
 
     /**
-     * Adiciona um personagem à lista e salva em JSON.
+     * MÉTODO 3: Atualiza um personagem no banco (salva progresso).
+     * Chamado quando sai do jogo para guardar level, exp, hp, mana, etc.
+     * @param userId ID do usuário
+     * @param ch Personagem a ser atualizado
+     * @throws IOException Se ocorrer erro
      */
-    public static void addCharacter(int userId, Character character) throws IOException {
-        List<Character> characters = loadCharacters(userId);
-        characters.add(character);
-        saveCharacters(userId, characters);
+    public static void updateCharacter(int userId, Character ch) throws IOException {
+        String sql = "UPDATE characters SET level=?, strength=?, agility=?, intelligence=?, health=?, mana=?, experience=? WHERE user_id=? AND name=?";
+        
+        try (Connection conn = DatabaseSQLite.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, ch.getLevel());
+            ps.setInt(2, ch.getStrength());
+            ps.setInt(3, ch.getAgility());
+            ps.setInt(4, ch.getIntelligence());
+            ps.setInt(5, ch.getHealth());
+            ps.setInt(6, ch.getMana());
+            ps.setLong(7, ch.getExperience());
+            ps.setInt(8, userId);
+            ps.setString(9, ch.getName());
+            
+            int updated = ps.executeUpdate();
+            if (updated > 0) {
+                System.out.println("✓ Personagem '" + ch.getName() + "' atualizado! Level: " + ch.getLevel() + " | XP: " + ch.getExperience());
+            }
+            
+        } catch (SQLException e) {
+            throw new IOException("✗ Erro ao atualizar personagem: " + e.getMessage());
+        }
     }
 
     /**
-     * Remove um personagem da lista e salva em JSON.
+     * MÉTODO 4: Deleta um personagem do banco.
+     * @param userId ID do usuário
+     * @param name Nome do personagem
+     * @throws IOException Se ocorrer erro
      */
-    public static void deleteCharacter(int userId, String characterName) throws IOException {
-        List<Character> characters = loadCharacters(userId);
-        characters.removeIf(c -> c.getName().equalsIgnoreCase(characterName));
-        saveCharacters(userId, characters);
-    }
-
-    private static File getCharacterFile(int userId) {
-        return new File(CHARACTERS_DIR, "user_" + userId + "_characters.json");
-    }
-
-    private static String extractJsonValue(String json, String key) {
-        int startIdx = json.indexOf("\"" + key + "\"");
-        if (startIdx == -1) return "";
-        startIdx = json.indexOf("\"", startIdx + key.length() + 3) + 1;
-        int endIdx = json.indexOf("\"", startIdx);
-        return endIdx > startIdx ? json.substring(startIdx, endIdx) : "";
-    }
-
-    private static String extractJsonNumberValue(String json, String key) {
-        int startIdx = json.indexOf("\"" + key + "\"");
-        if (startIdx == -1) return "";
-        startIdx = json.indexOf(":", startIdx) + 1;
-        while (startIdx < json.length() && java.lang.Character.isWhitespace(json.charAt(startIdx))) {
-            startIdx++;
+    public static void deleteCharacter(int userId, String name) throws IOException {
+        String sql = "DELETE FROM characters WHERE user_id=? AND name=?";
+        
+        try (Connection conn = DatabaseSQLite.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            ps.setString(2, name);
+            
+            int deleted = ps.executeUpdate();
+            if (deleted > 0) {
+                System.out.println("✓ Personagem '" + name + "' deletado com sucesso!");
+            }
+            
+        } catch (SQLException e) {
+            throw new IOException("✗ Erro ao deletar personagem: " + e.getMessage());
         }
-        int endIdx = startIdx;
-        while (endIdx < json.length() && (java.lang.Character.isDigit(json.charAt(endIdx)) || json.charAt(endIdx) == '.')) {
-            endIdx++;
+    }
+
+    /**
+     * MÉTODO 5: Verifica se já existe um personagem com esse nome.
+     * Chamado antes de criar novo personagem.
+     * @param userId ID do usuário
+     * @param name Nome a verificar
+     * @return true se existe, false caso contrário
+     */
+    public static boolean characterNameExists(int userId, String name) {
+        String sql = "SELECT 1 FROM characters WHERE user_id=? AND name=? LIMIT 1";
+        
+        try (Connection conn = DatabaseSQLite.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            ps.setString(2, name);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            System.err.println("✗ Erro ao verificar nome: " + e.getMessage());
+            return false;
         }
-        return endIdx > startIdx ? json.substring(startIdx, endIdx) : "";
+    }
+
+    /**
+     * MÉTODO 6: Salva personagens (compatibilidade com código anterior).
+     * Agora apenas chama updateCharacter para cada personagem.
+     * @param userId ID do usuário
+     * @param characters Lista de personagens
+     * @throws IOException Se ocorrer erro
+     */
+    public static void saveCharacters(int userId, List<Character> characters) throws IOException {
+        for (Character ch : characters) {
+            updateCharacter(userId, ch);
+        }
+    }
+
+    /**
+     * MÉTODO 7: Obtém um personagem específico pelo nome.
+     * @param userId ID do usuário
+     * @param name Nome do personagem
+     * @return Character ou null se não encontrado
+     */
+    public static Character getCharacterByName(int userId, String name) {
+        String sql = "SELECT id, name, race, clazz, level, strength, agility, intelligence, health, mana, experience FROM characters WHERE user_id=? AND name=? LIMIT 1";
+        
+        try (Connection conn = DatabaseSQLite.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            ps.setString(2, name);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Character ch = new Character(
+                        rs.getString("name"),
+                        rs.getString("race"),
+                        rs.getString("clazz")
+                    );
+                    
+                    ch.restoreStats(
+                        rs.getInt("level"),
+                        rs.getInt("strength"),
+                        rs.getInt("agility"),
+                        rs.getInt("intelligence"),
+                        rs.getInt("health"),
+                        rs.getInt("mana"),
+                        rs.getLong("experience")
+                    );
+                    
+                    return ch;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("✗ Erro ao carregar personagem: " + e.getMessage());
+        }
+        
+        return null;
+    }
+
+    /**
+     * MÉTODO 8: Conta quantos personagens um usuário tem.
+     * @param userId ID do usuário
+     * @return Número de personagens
+     */
+    public static int countCharacters(int userId) {
+        String sql = "SELECT COUNT(*) FROM characters WHERE user_id=?";
+        
+        try (Connection conn = DatabaseSQLite.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("✗ Erro ao contar personagens: " + e.getMessage());
+        }
+        
+        return 0;
     }
 }
