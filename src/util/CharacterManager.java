@@ -24,21 +24,19 @@ public class CharacterManager {
         String sql = "SELECT name, race, clazz, level, strength, agility, intelligence, health, mana, experience FROM characters WHERE user_id = ? ORDER BY created_at DESC";
         
         try {
-            Connection conn = DatabaseSQLite.getConnection();
+            Connection conn = Database.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);
             
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    // Criar personagem com dados básicos
                     Character ch = new Character(
                         rs.getString("name"),
                         rs.getString("race"),
                         rs.getString("clazz")
                     );
                     
-                    // Restaurar stats do banco de dados
                     ch.restoreStats(
                         rs.getInt("level"),
                         rs.getInt("strength"),
@@ -52,7 +50,7 @@ public class CharacterManager {
                     characters.add(ch);
                 }
             }
-            ps.close(); // Fecha PreparedStatement mas não a conexão
+            ps.close();
             
             System.out.println("✓ Carregados " + characters.size() + " personagens do usuário " + userId);
             
@@ -74,7 +72,7 @@ public class CharacterManager {
         String sql = "INSERT INTO characters (user_id, name, race, clazz, level, strength, agility, intelligence, health, mana, experience) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         
         try {
-            Connection conn = DatabaseSQLite.getConnection();
+            Connection conn = Database.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);
@@ -115,7 +113,7 @@ public class CharacterManager {
         String sql = "UPDATE characters SET level=?, strength=?, agility=?, intelligence=?, health=?, mana=?, experience=? WHERE user_id=? AND name=?";
         
         try {
-            Connection conn = DatabaseSQLite.getConnection();
+            Connection conn = Database.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, ch.getLevel());
@@ -150,7 +148,7 @@ public class CharacterManager {
         String sql = "DELETE FROM characters WHERE user_id=? AND name=?";
         
         try {
-            Connection conn = DatabaseSQLite.getConnection();
+            Connection conn = Database.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);
@@ -179,7 +177,7 @@ public class CharacterManager {
         String sql = "SELECT 1 FROM characters WHERE user_id=? AND name=? LIMIT 1";
         
         try {
-            Connection conn = DatabaseSQLite.getConnection();
+            Connection conn = Database.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);
@@ -219,7 +217,7 @@ public class CharacterManager {
         String sql = "SELECT id, name, race, clazz, level, strength, agility, intelligence, health, mana, experience FROM characters WHERE user_id=? AND name=? LIMIT 1";
         
         try {
-            Connection conn = DatabaseSQLite.getConnection();
+            Connection conn = Database.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);
@@ -264,7 +262,7 @@ public class CharacterManager {
         String sql = "SELECT COUNT(*) FROM characters WHERE user_id=?";
         
         try {
-            Connection conn = DatabaseSQLite.getConnection();
+            Connection conn = Database.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             
             ps.setInt(1, userId);

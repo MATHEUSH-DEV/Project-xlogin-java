@@ -1,78 +1,99 @@
 package util;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import java.io.InputStream;
-import java.util.Properties;
+import java.sql.*;
 
 /**
- * Classe para gerenciar conexões com banco de dados usando HikariCP.
- * Mantém um pool de conexões reutilizáveis para melhor performance.
+ * Gerenciador de conexão SQLite.
+ * Banco de dados portável que funciona sem servidor.
+ * Arquivo fica em: kronus_data/characters.db
  */
 public class Database {
-    private static HikariDataSource ds;
+    private static Connection connection;
 
     static {
-        try (InputStream in = Database.class.getResourceAsStream("/db.properties")) {
-            Properties p = new Properties();
-            p.load(in);
-
-            HikariConfig cfg = new HikariConfig();
-            cfg.setJdbcUrl(p.getProperty("db.url"));
-            cfg.setUsername(p.getProperty("db.user"));
-            cfg.setPassword(p.getProperty("db.password"));
-            cfg.setMaximumPoolSize(Integer.parseInt(p.getProperty("db.poolSize", "10")));
-            cfg.setMinimumIdle(2);
-            cfg.setConnectionTimeout(20000);
-            cfg.setIdleTimeout(300000);
-            cfg.setMaxLifetime(1800000);
-            cfg.setAutoCommit(true);
+        try {
+            // Carrega driver SQLite
+            Class.forName("org.sqlite.JDBC");
             
-            ds = new HikariDataSource(cfg);
+            // Cria/conecta ao banco (arquivo local)
+            String dbPath = "kronus_data/characters.db";
+            String url = "jdbc:sqlite:" + dbPath;
+            
+            // Cria conexão
+            java.util.Properties props = new java.util.Properties();
+            props.setProperty("journal_mode", "WAL");
+            
+            connection = DriverManager.getConnection(url, props);
+            
+            // Configurações para melhor performance
+            try (Statement stmt = connection.createStatement()) {
+                stmt.execute("PRAGMA foreign_keys = ON");
+                stmt.execute("PRAGMA synchronous = NORMAL");
+                stmt.execute("PRAGMA cache_size = 10000");
+            }
+            
             System.out.println("✓ ============================================");
-            System.out.println("✓ Conexão com banco de dados MySQL estabelecida!");
-            System.out.println("✓ Banco: kronus");
-            System.out.println("✓ Host: localhost:3306");
-            System.out.println("✓ Pool Size: " + cfg.getMaximumPoolSize());
+            System.out.println("✓ Conectado ao SQLite: " + dbPath);
+            System.out.println("✓ URL: " + url);
             System.out.println("✓ ============================================");
+            
+            // Criar tabelas se não existirem
+            initTables();
         } catch (Exception e) {
-            System.err.println("✗ ERRO ao conectar ao banco:");
-            System.err.println("✗ Mensagem: " + e.getMessage());
+            System.err.println("✗ Erro ao conectar SQLite: " + e.getMessage());
             e.printStackTrace();
             throw new ExceptionInInitializerError(e);
         }
     }
 
     /**
-     * Obtém o DataSource (pool de conexões).
-     * @return HikariDataSource com pool de conexões
+     * Cria tabelas se não existirem.
      */
-    public static HikariDataSource getDataSource() {
-        if (ds == null) {
-            throw new RuntimeException("DataSource não foi inicializado!");
+    private static void initTables() throws SQLException {
+        String createCharacters = "CREATE TABLE IF NOT EXISTS characters (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "user_id INTEGER NOT NULL," +
+            "name TEXT NOT NULL," +
+            "race TEXT NOT NULL," +
+            "clazz TEXT NOT NULL," +
+            "level INTEGER DEFAULT 1," +
+            "strength INTEGER DEFAULT 18," +
+            "agility INTEGER DEFAULT 12," +
+            "intelligence INTEGER DEFAULT 10," +
+            "health INTEGER DEFAULT 100," +
+            "mana INTEGER DEFAULT 50," +
+            "experience INTEGER DEFAULT 0," +
+            "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+            "UNIQUE(user_id, name)" +
+            ")";
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(createCharacters);
+            System.out.println("✓ Tabela 'characters' verificada/criada");
         }
-        return ds;
     }
 
     /**
-     * Fecha o pool de conexões (chamar ao desligar a aplicação).
+     * Obtém conexão com banco de dados (reutiliza a mesma conexão).
+     */
+    public static Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            throw new SQLException("Conexão SQLite não foi inicializada corretamente");
+        }
+        return connection;
+    }
+
+    /**
+     * Fecha conexão (chamar ao desligar aplicação).
      */
     public static void close() {
-        if (ds != null && !ds.isClosed()) {
-            ds.close();
-            System.out.println("✓ Pool de conexões fechado");
-        }
-    }
-
-    /**
-     * Verifica se está conectado ao banco.
-     * @return true se conectado, false caso contrário
-     */
-    public static boolean isConnected() {
         try {
-            return ds != null && !ds.isClosed();
-        } catch (Exception e) {
-            return false;
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+                System.out.println("✓ Conexão SQLite fechada");
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao fechar conexão: " + e.getMessage());
         }
     }
 }
