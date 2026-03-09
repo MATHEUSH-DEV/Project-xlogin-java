@@ -12,6 +12,8 @@ Este repositório contém o cliente de login/registro para o jogo **Kronus Rift*
 - **Integração**: `GameLauncher` agora executa um pequeno lobby em C++ localizado em `c_lobby/` usando `ProcessBuilder`.
 - **Utilitários**: Scripts Python (`user_create.py`, `item_generator.py`) para manipulação externa do banco.
 
+
+
 ---
 
 ## 🧩 Arquitetura proposta
