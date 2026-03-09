@@ -12,7 +12,8 @@ logs/
 node_modules/
 .properties
 dist/
-.bat
+*.bat
+.
 build/
 coverage/
 *.log
