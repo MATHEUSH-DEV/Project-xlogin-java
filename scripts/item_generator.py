@@ -43,8 +43,9 @@ def gerar_item_aleatorio():
 
 def salvar_no_banco(item, player_id):
     """Conecta e insere o item no inventário do jogador."""
-    # Garante que estamos usando o caminho correto do arquivo no Linux
-    db_path = 'kronus_local.db'
+    # Banco está no nível acima da pasta scripts (project root)
+    db_path = os.path.join(os.path.dirname(__file__), '..', 'kronus_local.db')
+    db_path = os.path.normpath(db_path)
     
     try:
         conn = sqlite3.connect(db_path)
@@ -61,8 +62,9 @@ def salvar_no_banco(item, player_id):
                 nome TEXT NOT NULL,
                 raridade TEXT NOT NULL,
                 ataque INTEGER NOT NULL,
-                player_id INTEGER NOT NULL,
-                FOREIGN KEY (player_id) REFERENCES usuarios(id) ON DELETE CASCADE
+                player_id TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (player_id) REFERENCES users(id) ON DELETE CASCADE
     
             )
         ''')
@@ -84,9 +86,34 @@ def salvar_no_banco(item, player_id):
 
 # --- EXECUÇÃO ---
 if __name__ == "__main__":
-    # Simulação: O player 1 (Matheus) dropou um item
+    import sys
+    
+    # Pode aceitar player_id via argumento ou usar padrão
+    player_id = sys.argv[1] if len(sys.argv) > 1 else None
+    
+    if not player_id:
+        # Tenta usar o primeiro usuário do banco
+        db_path = os.path.join(os.path.dirname(__file__), '..', 'kronus_local.db')
+        db_path = os.path.normpath(db_path)
+        try:
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM users LIMIT 1")
+            result = cursor.fetchone()
+            if result:
+                player_id = result[0]
+                print(f"[*] Using first user from database: {player_id}")
+            else:
+                print("[!] ERROR: No users found in database! Run user_create.py first.")
+                exit(1)
+            conn.close()
+        except Exception as e:
+            print(f"[!] ERROR: {e}")
+            exit(1)
+    
+    # Simulação: O player dropou um item
     item_dropado = gerar_item_aleatorio()
     print(f"[*] Monster Dropped: {item_dropado[0]} [{item_dropado[1]}] - Atk: {item_dropado[2]}")
     
-    # Salva para o ID 1 (seu ID no banco)
-    salvar_no_banco(item_dropado, 1)
+    # Salva para o usuario
+    salvar_no_banco(item_dropado, player_id)
