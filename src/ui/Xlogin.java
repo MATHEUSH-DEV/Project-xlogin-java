@@ -50,9 +50,9 @@ public class Xlogin extends javax.swing.JFrame {
                     JOptionPane.showMessageDialog(null, "User or Password incorrect!");
                 }
             } catch (IllegalStateException ban) {
-                JOptionPane.showMessageDialog(null, "Your account is banned!", "Security Risk", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, ban.getMessage(), "Account Status", JOptionPane.WARNING_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Database Error: " + ex.getMessage());
+                JOptionPane.showMessageDialog(null, "Login Error: " + ex.getMessage());
             }
         });
 

@@ -19,7 +19,7 @@ import util.CharacterManager;
  * Interface para criação, listagem e gerenciamento de personagens.
  */
 public class CppLobbyWindow extends JFrame {
-    private final int userId;
+    private final String userId;
     private final Process process;
     private PrintWriter processWriter;
     private JPanel characterListPanel;
@@ -28,7 +28,7 @@ public class CppLobbyWindow extends JFrame {
     private JComboBox<String> classBox;
     private List<Character> characters;
 
-    public CppLobbyWindow(Process process, int userId, String execPath) {
+    public CppLobbyWindow(Process process, String userId, String execPath) {
         super("Kronus Rift - Lobby");
         this.process = process;
         this.userId = userId;
@@ -37,7 +37,7 @@ public class CppLobbyWindow extends JFrame {
         hookProcessStreams();
     }
 
-    private void initUI(int userId) {
+    private void initUI(String userId) {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(900, 650);
         setLocationRelativeTo(null);

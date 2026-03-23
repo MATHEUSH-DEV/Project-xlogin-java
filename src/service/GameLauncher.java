@@ -6,7 +6,7 @@ import model.Character;
 
 public class GameLauncher {
 
-    public static void launchLobby(int userId) throws IOException {
+    public static void launchLobby(String userId) throws IOException {
         String os = System.getProperty("os.name").toLowerCase();
         String lobbyPath;
         if (os.contains("win")) {
@@ -23,7 +23,7 @@ public class GameLauncher {
             );
         }
 
-        ProcessBuilder pb = new ProcessBuilder(execFile.getAbsolutePath(), String.valueOf(userId));
+        ProcessBuilder pb = new ProcessBuilder(execFile.getAbsolutePath(), userId);
         pb.directory(new File(System.getProperty("user.dir")));
         Process process = pb.start();
         System.out.println("[Launcher] C++ Lobby iniciado para o User: " + userId + " usando: " + execFile.getAbsolutePath());
@@ -34,7 +34,7 @@ public class GameLauncher {
         });
     }
 
-    public static void launchGame(int userId, String characterName) {
+    public static void launchGame(String userId, String characterName) {
         Character character = util.CharacterManager.getCharacterByName(userId, characterName);
         if (character == null) {
             javax.swing.JOptionPane.showMessageDialog(null, "Personagem não encontrado!", "Erro", javax.swing.JOptionPane.ERROR_MESSAGE);
