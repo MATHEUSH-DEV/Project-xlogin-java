@@ -13,9 +13,9 @@ logs/
 node_modules/
 .properties
 dist/
-*.bat
-.
+md/
 build/
+scripts/
 coverage/
 *.log
 *.sqlite
@@ -23,12 +23,14 @@ coverage/
 *.bak
 *.tmp
 *.json
+*.txt
 *.swp
 *.swo
 thumbs.db
 character_data/
 characters.db
-
+*.ps1
+*.bat
 *.exe
 *.dll
 *.so
