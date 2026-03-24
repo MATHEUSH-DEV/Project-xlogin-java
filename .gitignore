@@ -9,11 +9,11 @@ bin/
 .idea/
 out/
 *.deb
+*.properties
 *.iml
 logs/
 *.sql
 node_modules/
-.properties
 dist/
 md/
 build/
