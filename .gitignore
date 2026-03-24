@@ -6,7 +6,6 @@ bin/
 *.DS_Store
 *.env
 *.md
-!README.md
 .idea/
 out/
 *.deb
