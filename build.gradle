@@ -116,6 +116,7 @@ jacocoTestCoverageVerification {
     }
 }
 
+
 // Build configuration
 build {
     dependsOn check

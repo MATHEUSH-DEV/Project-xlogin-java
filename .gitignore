@@ -10,6 +10,7 @@ out/
 *.deb
 *.iml
 logs/
+*.sql
 node_modules/
 .properties
 dist/
