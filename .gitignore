@@ -1,4 +1,5 @@
 kronus_local.db
+verify_schema.py
 
 .vscode/
 bin/
